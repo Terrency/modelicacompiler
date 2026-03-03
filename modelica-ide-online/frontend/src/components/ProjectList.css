@@ -1,0 +1,132 @@
+.project-list-container {
+  min-height: 100vh;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  font-size: 28px;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.project-card {
+  background: #2d2d2d;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.project-info {
+  padding: 16px;
+  cursor: pointer;
+}
+
+.project-info h3 {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #e0e0e0;
+}
+
+.project-info p {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.project-date {
+  font-size: 12px;
+  color: #666;
+}
+
+.project-actions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #252526;
+  border-top: 1px solid #3c3c3c;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #2d2d2d;
+  padding: 24px;
+  border-radius: 8px;
+  min-width: 400px;
+}
+
+.modal h2 {
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.modal input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #3c3c3c;
+  border-radius: 4px;
+  background: #1e1e1e;
+  color: #e0e0e0;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.modal input:focus {
+  outline: none;
+  border-color: #0e639c;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px;
+}
+
+.empty-state h2 {
+  font-size: 24px;
+  font-weight: 400;
+  margin-bottom: 8px;
+  color: #888;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 24px;
+}

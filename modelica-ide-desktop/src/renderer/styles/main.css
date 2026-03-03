@@ -93,20 +93,67 @@ body {
 
 /* 侧边栏 */
 .sidebar {
-  width: 200px;
+  width: 240px;
   background: #252526;
   border-right: 1px solid #3c3c3c;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-section {
+  border-bottom: 1px solid #3c3c3c;
 }
 
 .sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 12px;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   color: #bbbbbb;
-  border-bottom: 1px solid #3c3c3c;
+  background: #2d2d2d;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sidebar-header:hover {
+  background: #333;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.toggle-icon {
+  font-size: 8px;
+  color: #888;
+}
+
+.new-file-btn {
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  background: #0e639c;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.new-file-btn:hover {
+  background: #1177bb;
+}
+
+.sidebar-actions {
+  padding: 12px;
+  margin-top: auto;
 }
 
 .file-tree {
@@ -119,7 +166,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
+  padding: 4px 12px 4px 24px;
   cursor: pointer;
   font-size: 13px;
 }
@@ -130,6 +177,18 @@ body {
 
 .file-item.active {
   background: #37373d;
+}
+
+.file-item.library-file {
+  color: #9cdcfe;
+}
+
+.file-item.example-file {
+  color: #ce9178;
+}
+
+.file-item.user-file {
+  color: #d4d4d4;
 }
 
 .file-icon {
@@ -207,6 +266,12 @@ body {
   color: #888;
 }
 
+.welcome-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
 .primary-btn {
   padding: 10px 20px;
   background: #0e639c;
@@ -220,6 +285,21 @@ body {
 
 .primary-btn:hover {
   background: #1177bb;
+}
+
+.secondary-btn {
+  padding: 10px 20px;
+  background: #3c3c3c;
+  border: none;
+  border-radius: 4px;
+  color: #cccccc;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.secondary-btn:hover {
+  background: #4a4a4a;
 }
 
 /* 右侧面板 */

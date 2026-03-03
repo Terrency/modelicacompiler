@@ -1,11 +1,16 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, reactive } from 'vue'
 
-interface FileItem {
-  path: string
+// 树节点接口
+interface TreeNode {
+  id: string
   name: string
-  content: string
-  isLibrary?: boolean
+  type: 'package' | 'class' | 'function' | 'file'
+  path: string
+  content?: string
+  children: TreeNode[]
+  isExpanded: boolean
+  isLibrary: boolean
 }
 
 interface OutputMessage {
@@ -22,8 +27,50 @@ interface CompileError {
   }
 }
 
-// Modelica Standard Library - Built-in files
-const MSL_FILES: FileItem[] = [
+// 构建树形结构
+function buildTree(files: { path: string; name: string; content: string; isLibrary: boolean }[]): TreeNode[] {
+  const root: TreeNode = {
+    id: 'root',
+    name: 'root',
+    type: 'package',
+    path: '',
+    children: [],
+    isExpanded: true,
+    isLibrary: false
+  }
+
+  files.forEach(file => {
+    const parts = file.path.split('/')
+    let current = root
+
+    parts.forEach((part, index) => {
+      const isLast = index === parts.length - 1
+      const existingChild = current.children.find(c => c.name === part)
+
+      if (existingChild) {
+        current = existingChild
+      } else {
+        const newNode: TreeNode = {
+          id: file.path,
+          name: part,
+          type: isLast ? 'class' : 'package',
+          path: parts.slice(0, index + 1).join('/'),
+          content: isLast ? file.content : undefined,
+          children: [],
+          isExpanded: index === 0, // 默认展开第一层
+          isLibrary: file.isLibrary
+        }
+        current.children.push(newNode)
+        current = newNode
+      }
+    })
+  })
+
+  return root.children
+}
+
+// Modelica Standard Library 文件
+const MSL_FILES = [
   {
     path: 'Modelica/package.mo',
     name: 'Modelica',
@@ -35,38 +82,12 @@ package Modelica "Modelica Standard Library - Version 4.0.0"
     version = "4.0.0",
     versionDate = "2020-06-25",
     Documentation(info = "<html>
-<p>
-Package <strong>Modelica</strong> is a <strong>standardized</strong> and <strong>free</strong> library
+<p>Package <strong>Modelica</strong> is a <strong>standardized</strong> and <strong>free</strong> library
 that is developed together with the Modelica language from the
 Modelica Association.
 </p>
 </html>"));
 end Modelica;`,
-    isLibrary: true
-  },
-  {
-    path: 'Modelica/Constants.mo',
-    name: 'Constants',
-    content: `within Modelica;
-package Constants "Mathematical constants and constants of nature"
-  extends Modelica.Icons.Package;
-
-  // Mathematical constants
-  final constant Real e = 2.71828182845905;
-  final constant Real pi = 3.14159265358979;
-  final constant Real D2R = pi/180 "Degree to Radian";
-  final constant Real R2D = 180/pi "Radian to Degree";
-  final constant Real gamma = 0.57721566490153 "Euler's constant";
-
-  // Constants of nature
-  final constant Real N_A = 6.02214076e23 "Avogadro constant";
-  final constant Real k = 1.380649e-23 "Boltzmann constant";
-  final constant Real R = N_A*k "Molar gas constant";
-  final constant Real c = 299792458 "Speed of light";
-  final constant Real g_n = 9.80665 "Standard gravity";
-
-  annotation (Documentation(info="<html><p>Mathematical and physical constants.</p></html>"));
-end Constants;`,
     isLibrary: true
   },
   {
@@ -98,7 +119,39 @@ package Icons "Icon definitions"
       extent={{-100,-100},{100,100}})}));
   end Function;
 
+  partial block Block "Icon for blocks"
+    annotation(Icon(graphics={Rectangle(
+      lineColor={128,128,128},
+      fillColor={248,248,248},
+      extent={{-100,-100},{100,100}})}));
+  end Block;
+
 end Icons;`,
+    isLibrary: true
+  },
+  {
+    path: 'Modelica/Constants.mo',
+    name: 'Constants',
+    content: `within Modelica;
+package Constants "Mathematical constants and constants of nature"
+  extends Modelica.Icons.Package;
+
+  // Mathematical constants
+  final constant Real e = 2.71828182845905;
+  final constant Real pi = 3.14159265358979;
+  final constant Real D2R = pi/180 "Degree to Radian";
+  final constant Real R2D = 180/pi "Radian to Degree";
+  final constant Real gamma = 0.57721566490153 "Euler's constant";
+
+  // Constants of nature
+  final constant Real N_A = 6.02214076e23 "Avogadro constant";
+  final constant Real k = 1.380649e-23 "Boltzmann constant";
+  final constant Real R = N_A*k "Molar gas constant";
+  final constant Real c = 299792458 "Speed of light";
+  final constant Real g_n = 9.80665 "Standard gravity";
+
+  annotation (Documentation(info="<html><p>Mathematical and physical constants.</p></html>"));
+end Constants;`,
     isLibrary: true
   },
   {
@@ -218,32 +271,58 @@ package SIunits "Type definitions based on SI units"
 end SIunits;`,
     isLibrary: true
   },
+  // Examples
   {
-    path: 'Examples/SimplePendulum.mo',
-    name: 'SimplePendulum',
+    path: 'Examples/package.mo',
+    name: 'Examples',
     content: `within ;
-model SimplePendulum "A simple pendulum model"
+package Examples "Example models"
+  extends Modelica.Icons.Package;
+  annotation (Documentation(info="<html><p>Example models demonstrating Modelica.</p></html>"));
+end Examples;`,
+    isLibrary: true
+  },
+  {
+    path: 'Examples/HelloWorld.mo',
+    name: 'HelloWorld',
+    content: `within Examples;
+model HelloWorld "The simplest Modelica model"
   extends Modelica.Icons.Example;
 
-  // Parameters
-  parameter Modelica.SIunits.Length L = 1.0 "Pendulum length";
-  parameter Modelica.SIunits.Acceleration g = 9.81 "Gravity constant";
-  parameter Modelica.SIunits.Angle theta0 = 0.1 "Initial angle (rad)";
-
-  // State variables
-  Modelica.SIunits.Angle theta(start=theta0) "Pendulum angle";
-  Modelica.SIunits.AngularVelocity omega(start=0) "Angular velocity";
+  Real x(start=1) "A state variable";
 
 equation
-  // Equations of motion
-  der(theta) = omega;
-  der(omega) = -(g/L) * Modelica.Math.sin(theta);
+  der(x) = -x;
 
   annotation (
     Documentation(info="<html>
-<p>This is a simple pendulum model demonstrating the basic structure
-of a Modelica model with differential equations.</p>
+<p>This is the simplest possible Modelica model with a single
+differential equation: dx/dt = -x</p>
 </html>"),
+    experiment(StopTime=5, Interval=0.01));
+end HelloWorld;`,
+    isLibrary: true
+  },
+  {
+    path: 'Examples/SimplePendulum.mo',
+    name: 'SimplePendulum',
+    content: `within Examples;
+model SimplePendulum "A simple pendulum model"
+  extends Modelica.Icons.Example;
+
+  parameter Real L = 1.0 "Pendulum length (m)";
+  parameter Real g = 9.81 "Gravity (m/s2)";
+  parameter Real theta0 = 0.1 "Initial angle (rad)";
+
+  Real theta(start=theta0) "Pendulum angle";
+  Real omega(start=0) "Angular velocity";
+
+equation
+  der(theta) = omega;
+  der(omega) = -(g/L) * sin(theta);
+
+  annotation (
+    Documentation(info="<html><p>Simple pendulum dynamics.</p></html>"),
     experiment(StopTime=10, Interval=0.01));
 end SimplePendulum;`,
     isLibrary: true
@@ -251,19 +330,15 @@ end SimplePendulum;`,
   {
     path: 'Examples/BouncingBall.mo',
     name: 'BouncingBall',
-    content: `within ;
+    content: `within Examples;
 model BouncingBall "A bouncing ball model"
   extends Modelica.Icons.Example;
 
-  // Parameters
   parameter Real e = 0.7 "Coefficient of restitution";
   parameter Real g = 9.81 "Gravity";
 
-  // State variables
   Real h(start=1.0) "Height of ball";
   Real v(start=0) "Velocity of ball";
-
-  // State event
   Boolean flying(start=true) "True if ball is flying";
 
 equation
@@ -278,9 +353,7 @@ equation
   der(v) = if flying then -g else 0;
 
   annotation (
-    Documentation(info="<html>
-<p>This model simulates a ball bouncing on a flat surface.</p>
-</html>"),
+    Documentation(info="<html><p>Ball bouncing on a surface.</p></html>"),
     experiment(StopTime=5, Interval=0.01));
 end BouncingBall;`,
     isLibrary: true
@@ -288,129 +361,138 @@ end BouncingBall;`,
   {
     path: 'Examples/DCMotor.mo',
     name: 'DCMotor',
-    content: `within ;
+    content: `within Examples;
 model DCMotor "A simple DC motor model"
   extends Modelica.Icons.Example;
 
-  // Electrical parameters
   parameter Real R = 1.0 "Resistance (Ohm)";
   parameter Real L = 0.01 "Inductance (H)";
   parameter Real K = 0.1 "Motor constant";
-
-  // Mechanical parameters
   parameter Real J = 0.01 "Inertia (kg.m2)";
-  parameter Real B = 0.001 "Damping (N.m.s)";
+  parameter Real B = 0.001 "Damping";
 
-  // Variables
   Real v "Voltage (V)";
   Real i(start=0) "Current (A)";
   Real w(start=0) "Angular velocity (rad/s)";
   Real tau "Torque (N.m)";
 
 equation
-  // Electrical equations
   v = R*i + L*der(i) + K*w;
-
-  // Mechanical equations
   tau = K*i;
   J*der(w) = tau - B*w;
-
-  // Input voltage (step)
   v = if time < 0.5 then 0 else 10;
 
   annotation (
-    Documentation(info="<html><p>Simple DC motor with electrical and mechanical dynamics.</p></html>"),
+    Documentation(info="<html><p>DC motor with electrical and mechanical dynamics.</p></html>"),
     experiment(StopTime=2, Interval=0.001));
 end DCMotor;`,
     isLibrary: true
   },
   {
-    path: 'Examples/HelloWorld.mo',
-    name: 'HelloWorld',
-    content: `within ;
-model HelloWorld "The simplest Modelica model"
+    path: 'Examples/LorenzSystem.mo',
+    name: 'LorenzSystem',
+    content: `within Examples;
+model LorenzSystem "Lorenz attractor"
   extends Modelica.Icons.Example;
 
-  Real x(start=1) "A state variable";
+  parameter Real sigma = 10.0;
+  parameter Real rho = 28.0;
+  parameter Real beta = 8.0/3.0;
+
+  Real x(start=1.0);
+  Real y(start=1.0);
+  Real z(start=1.0);
 
 equation
-  der(x) = -x;
+  der(x) = sigma * (y - x);
+  der(y) = x * (rho - z) - y;
+  der(z) = x * y - beta * z;
 
-  annotation (
-    Documentation(info="<html>
-<p>
-This is the simplest possible Modelica model with a single
-differential equation: dx/dt = -x
-</p>
-<p>
-The solution is x(t) = x0 * exp(-t), which shows exponential decay.
-</p>
-</html>"),
-    experiment(StopTime=5, Interval=0.01));
-end HelloWorld;`,
+  annotation (experiment(StopTime=30, Interval=0.01));
+end LorenzSystem;`,
     isLibrary: true
   }
 ]
 
 export const useProjectStore = defineStore('project', () => {
   // State
-  const files = ref<FileItem[]>([])
-  const openFiles = ref<FileItem[]>([])
+  const treeNodes = ref<TreeNode[]>([])
+  const openFiles = ref<TreeNode[]>([])
   const currentFileIndex = ref<number>(-1)
   const outputMessages = ref<OutputMessage[]>([])
   const errors = ref<CompileError[]>([])
   const libraryLoaded = ref<boolean>(false)
+  const expandedNodes = ref<Set<string>>(new Set())
 
   // Computed
   const currentFile = computed(() =>
     currentFileIndex.value >= 0 ? openFiles.value[currentFileIndex.value] : null
   )
 
-  const libraryFiles = computed(() =>
-    files.value.filter(f => f.isLibrary)
-  )
-
-  const userFiles = computed(() =>
-    files.value.filter(f => !f.isLibrary)
-  )
-
-  // Initialize with MSL
+  // 初始化 - 加载MSL
   function loadStandardLibrary() {
     if (libraryLoaded.value) return
 
-    MSL_FILES.forEach(file => {
-      files.value.push(file)
-    })
+    treeNodes.value = buildTree(MSL_FILES)
+
+    // 默认展开 Modelica 和 Examples
+    expandedNodes.value.add('Modelica')
+    expandedNodes.value.add('Examples')
+    expandedNodes.value.add('Modelica/Math')
+
     libraryLoaded.value = true
 
-    // Open HelloWorld as default
-    const helloWorld = files.value.find(f => f.name === 'HelloWorld')
+    // 打开 HelloWorld 作为默认文件
+    const helloWorld = findNodeByPath(treeNodes.value, 'Examples/HelloWorld.mo')
     if (helloWorld) {
       openFile(helloWorld)
     }
   }
 
-  // Actions
-  function addFile(file: FileItem) {
-    const existing = files.value.find(f => f.path === file.path)
-    if (!existing) {
-      files.value.push(file)
+  // 查找节点
+  function findNodeByPath(nodes: TreeNode[], path: string): TreeNode | null {
+    for (const node of nodes) {
+      if (node.path === path) return node
+      if (node.children.length > 0) {
+        const found = findNodeByPath(node.children, path)
+        if (found) return found
+      }
     }
-    openFile(file)
+    return null
   }
 
-  function openFile(file: FileItem) {
-    const index = openFiles.value.findIndex(f => f.path === file.path)
+  // 切换节点展开状态
+  function toggleNode(node: TreeNode) {
+    if (node.children.length === 0) return
+
+    if (expandedNodes.value.has(node.path)) {
+      expandedNodes.value.delete(node.path)
+    } else {
+      expandedNodes.value.add(node.path)
+    }
+  }
+
+  // 检查节点是否展开
+  function isNodeExpanded(node: TreeNode): boolean {
+    return expandedNodes.value.has(node.path)
+  }
+
+  // 打开文件
+  function openFile(node: TreeNode) {
+    if (!node.content) return // 不是文件节点
+
+    const index = openFiles.value.findIndex(f => f.path === node.path)
     if (index >= 0) {
       currentFileIndex.value = index
     } else {
-      openFiles.value.push(file)
+      openFiles.value.push(node)
       currentFileIndex.value = openFiles.value.length - 1
     }
   }
 
-  function closeFile(file: FileItem) {
-    const index = openFiles.value.findIndex(f => f.path === file.path)
+  // 关闭文件
+  function closeFile(node: TreeNode) {
+    const index = openFiles.value.findIndex(f => f.path === node.path)
     if (index >= 0) {
       openFiles.value.splice(index, 1)
       if (currentFileIndex.value >= openFiles.value.length) {
@@ -419,68 +501,76 @@ export const useProjectStore = defineStore('project', () => {
     }
   }
 
-  function setCurrentFile(file: FileItem) {
-    const index = openFiles.value.findIndex(f => f.path === file.path)
+  // 设置当前文件
+  function setCurrentFile(node: TreeNode) {
+    const index = openFiles.value.findIndex(f => f.path === node.path)
     if (index >= 0) {
       currentFileIndex.value = index
     }
   }
 
+  // 更新文件内容
   function updateFileContent(path: string, content: string) {
     const file = openFiles.value.find(f => f.path === path)
     if (file) {
       file.content = content
     }
-    const originalFile = files.value.find(f => f.path === path)
-    if (originalFile) {
-      originalFile.content = content
-    }
   }
 
+  // 创建新文件
   function createFile() {
-    const newFile: FileItem = {
+    const newFile: TreeNode = {
+      id: `untitled-${Date.now()}`,
+      name: `untitled-${openFiles.value.length + 1}.mo`,
+      type: 'class',
       path: `untitled-${Date.now()}.mo`,
-      name: `untitled-${files.value.filter(f => !f.isLibrary).length + 1}.mo`,
       content: `model NewModel
   // Add your model here
   Real x(start=1);
 equation
   der(x) = -x;  // Example equation
 end NewModel;
-`
+`,
+      children: [],
+      isExpanded: false,
+      isLibrary: false
     }
-    files.value.push(newFile)
+    treeNodes.value.push(newFile)
     openFile(newFile)
   }
 
+  // 添加输出消息
   function addOutput(text: string, type: OutputMessage['type'] = 'info') {
     const timestamp = new Date().toLocaleTimeString()
     outputMessages.value.push({ type, text, timestamp })
   }
 
+  // 添加错误
   function addError(message: string, location?: { line: number; column: number }) {
     errors.value.push({ message, location })
   }
 
+  // 清除输出
   function clearOutput() {
     outputMessages.value = []
   }
 
+  // 清除错误
   function clearErrors() {
     errors.value = []
   }
 
   return {
-    files,
+    treeNodes,
     openFiles,
     currentFile,
     outputMessages,
     errors,
     libraryLoaded,
-    libraryFiles,
-    userFiles,
+    expandedNodes,
     loadStandardLibrary,
-    addFile,
+    toggleNode,
+    isNodeExpanded,
     openFile,
     closeFile,
     setCurrentFile,

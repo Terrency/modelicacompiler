@@ -23,67 +23,19 @@
     <main class="main-content">
       <!-- 左侧文件树 -->
       <aside class="sidebar">
-        <!-- Modelica Standard Library -->
-        <div class="sidebar-section">
-          <div class="sidebar-header" @click="toggleLibrary">
-            <span class="toggle-icon">{{ libraryExpanded ? '▼' : '▶' }}</span>
-            <h3>📚 Modelica Standard Library</h3>
-          </div>
-          <div v-show="libraryExpanded" class="file-tree">
-            <div
-              v-for="file in libraryFiles"
-              :key="file.path"
-              class="file-item library-file"
-              :class="{ active: currentFile?.path === file.path }"
-              @click="selectFile(file)"
-            >
-              <span class="file-icon">📦</span>
-              {{ file.name }}
-            </div>
-          </div>
+        <div class="sidebar-header-main">
+          <h3>📦 Modelica Standard Library</h3>
         </div>
 
-        <!-- Examples -->
-        <div class="sidebar-section">
-          <div class="sidebar-header" @click="toggleExamples">
-            <span class="toggle-icon">{{ examplesExpanded ? '▼' : '▶' }}</span>
-            <h3>📝 Examples</h3>
-          </div>
-          <div v-show="examplesExpanded" class="file-tree">
-            <div
-              v-for="file in exampleFiles"
-              :key="file.path"
-              class="file-item example-file"
-              :class="{ active: currentFile?.path === file.path }"
-              @click="selectFile(file)"
-            >
-              <span class="file-icon">🧪</span>
-              {{ file.name }}
-            </div>
-          </div>
-        </div>
+        <FileTree
+          :nodes="treeNodes"
+          :expanded-ids="expandedNodes"
+          :active-path="currentFile?.path || null"
+          @toggle="handleToggle"
+          @select="handleSelect"
+        />
 
-        <!-- User Files -->
-        <div class="sidebar-section" v-if="userFiles.length > 0">
-          <div class="sidebar-header">
-            <h3>📁 My Files</h3>
-            <button class="new-file-btn" @click="newFile" title="New File">+</button>
-          </div>
-          <div class="file-tree">
-            <div
-              v-for="file in userFiles"
-              :key="file.path"
-              class="file-item user-file"
-              :class="{ active: currentFile?.path === file.path }"
-              @click="selectFile(file)"
-            >
-              <span class="file-icon">📄</span>
-              {{ file.name }}
-            </div>
-          </div>
-        </div>
-
-        <!-- New File Button -->
+        <!-- 新建文件按钮 -->
         <div class="sidebar-actions">
           <button class="toolbar-btn" @click="newFile" title="New File">
             <span class="icon">➕</span> New File
@@ -99,7 +51,7 @@
             :key="file.path"
             class="tab"
             :class="{ active: currentFile?.path === file.path, 'library-tab': file.isLibrary }"
-            @click="selectFile(file)"
+            @click="selectTab(file)"
           >
             <span v-if="file.isLibrary" class="tab-icon">📦</span>
             {{ file.name }}
@@ -108,7 +60,7 @@
         </div>
         <Editor
           v-if="currentFile"
-          :value="currentFile.content"
+          :value="currentFile.content || ''"
           @update:value="updateContent"
         />
         <div v-else class="welcome-screen">
@@ -157,6 +109,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useProjectStore } from './stores/project'
 import Editor from './components/Editor.vue'
+import FileTree from './components/FileTree.vue'
 import OutputConsole from './components/OutputPanel.vue'
 import ErrorPanel from './components/ErrorList.vue'
 
@@ -166,8 +119,6 @@ const store = useProjectStore()
 const rightPanelTab = ref<'output' | 'errors'>('output')
 const statusText = ref('Ready')
 const cursorPosition = ref({ line: 1, column: 1 })
-const libraryExpanded = ref(true)
-const examplesExpanded = ref(true)
 
 // 初始化 - 加载MSL
 onMounted(() => {
@@ -175,33 +126,42 @@ onMounted(() => {
 })
 
 // 计算属性
-const files = computed(() => store.files)
+const treeNodes = computed(() => store.treeNodes)
 const openFiles = computed(() => store.openFiles)
 const currentFile = computed(() => store.currentFile)
 const outputMessages = computed(() => store.outputMessages)
 const errors = computed(() => store.errors)
-const libraryFiles = computed(() => store.libraryFiles.filter(f => !f.path.startsWith('Examples')))
-const exampleFiles = computed(() => store.libraryFiles.filter(f => f.path.startsWith('Examples')))
-const userFiles = computed(() => store.userFiles)
+const expandedNodes = computed(() => store.expandedNodes)
 
-// 方法
-function toggleLibrary() {
-  libraryExpanded.value = !libraryExpanded.value
+// 树节点操作
+function handleToggle(node: any) {
+  store.toggleNode(node)
 }
 
-function toggleExamples() {
-  examplesExpanded.value = !examplesExpanded.value
+function handleSelect(node: any) {
+  if (node.content) {
+    store.openFile(node)
+  }
 }
 
+// 文件操作
 async function openFile() {
   try {
     const result = await window.electronAPI.openFile()
     if (result) {
-      store.addFile({
-        path: result.path,
+      // 添加到树中
+      const newNode = {
+        id: result.path,
         name: result.path.split('/').pop() || result.path,
-        content: result.content
-      })
+        type: 'class',
+        path: result.path,
+        content: result.content,
+        children: [],
+        isExpanded: false,
+        isLibrary: false
+      }
+      store.treeNodes.push(newNode)
+      store.openFile(newNode)
     }
   } catch (error) {
     console.error('Failed to open file:', error)
@@ -210,7 +170,7 @@ async function openFile() {
 
 async function saveFile() {
   if (currentFile.value) {
-    await window.electronAPI.saveFile(currentFile.value.path, currentFile.value.content)
+    await window.electronAPI.saveFile(currentFile.value.path, currentFile.value.content || '')
     statusText.value = 'File saved'
   }
 }
@@ -223,7 +183,7 @@ async function compile() {
   store.clearErrors()
 
   try {
-    const result = await window.electronAPI.compileCode(currentFile.value.content)
+    const result = await window.electronAPI.compileCode(currentFile.value.content || '')
 
     if (result.success) {
       store.addOutput('Compilation successful!')
@@ -242,7 +202,7 @@ function newFile() {
   store.createFile()
 }
 
-function selectFile(file: any) {
+function selectTab(file: any) {
   store.setCurrentFile(file)
 }
 
@@ -257,7 +217,19 @@ function updateContent(content: string) {
 }
 
 function openFirstExample() {
-  const helloWorld = store.files.find(f => f.name === 'HelloWorld')
+  // 找到 HelloWorld 示例
+  const findHelloWorld = (nodes: any[]): any => {
+    for (const node of nodes) {
+      if (node.name === 'HelloWorld') return node
+      if (node.children?.length > 0) {
+        const found = findHelloWorld(node.children)
+        if (found) return found
+      }
+    }
+    return null
+  }
+
+  const helloWorld = findHelloWorld(store.treeNodes)
   if (helloWorld) {
     store.openFile(helloWorld)
   }

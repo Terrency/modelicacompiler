@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 object ModelicaStandardLibrary {
     val files = listOf(
+        // Main Modelica package
         ProjectFile(
             id = "msl_package",
             name = "Modelica",
@@ -29,6 +30,7 @@ end Modelica;
             """.trimIndent(),
             size = 500
         ),
+        // Icons
         ProjectFile(
             id = "msl_icons",
             name = "Icons",
@@ -60,10 +62,26 @@ package Icons "Icon definitions"
       extent={{-100,-100},{100,100}})}));
   end Function;
 
+  partial block Block "Icon for blocks"
+    annotation(Icon(graphics={Rectangle(
+      lineColor={128,128,128},
+      fillColor={248,248,248},
+      extent={{-100,-100},{100,100}})}));
+  end Block;
+
+  partial package InterfacesPackage "Icon for interfaces packages"
+    extends Package;
+  end InterfacesPackage;
+
+  partial package SourcesPackage "Icon for sources packages"
+    extends Package;
+  end SourcesPackage;
+
 end Icons;
             """.trimIndent(),
-            size = 800
+            size = 1200
         ),
+        // Constants
         ProjectFile(
             id = "msl_constants",
             name = "Constants",
@@ -78,18 +96,23 @@ package Constants "Mathematical constants and constants of nature"
   final constant Real pi = 3.14159265358979;
   final constant Real D2R = pi/180 "Degree to Radian";
   final constant Real R2D = 180/pi "Radian to Degree";
+  final constant Real gamma = 0.57721566490153 "Euler's constant";
 
   // Constants of nature
   final constant Real N_A = 6.02214076e23 "Avogadro constant";
   final constant Real k = 1.380649e-23 "Boltzmann constant";
+  final constant Real R = N_A*k "Molar gas constant";
   final constant Real c = 299792458 "Speed of light";
   final constant Real g_n = 9.80665 "Standard gravity";
+  final constant Real sigma = 5.670374419e-8 "Stefan-Boltzmann constant";
+  final constant Real small = 1e-60 "Smallest number";
 
   annotation (Documentation(info="<html><p>Mathematical and physical constants.</p></html>"));
 end Constants;
             """.trimIndent(),
-            size = 600
+            size = 800
         ),
+        // Math package
         ProjectFile(
             id = "msl_math",
             name = "Math",
@@ -106,6 +129,20 @@ package Math "Mathematical functions"
   external "builtin" y = exp(u);
   end exp;
 
+  function log "Natural logarithm"
+    extends Modelica.Icons.Function;
+    input Real u;
+    output Real y;
+  external "builtin" y = log(u);
+  end log;
+
+  function log10 "Base 10 logarithm"
+    extends Modelica.Icons.Function;
+    input Real u;
+    output Real y;
+  external "builtin" y = log10(u);
+  end log10;
+
   function sin "Sine function"
     extends Modelica.Icons.Function;
     input Real u;
@@ -120,6 +157,63 @@ package Math "Mathematical functions"
   external "builtin" y = cos(u);
   end cos;
 
+  function tan "Tangent function"
+    extends Modelica.Icons.Function;
+    input Real u;
+    output Real y;
+  external "builtin" y = tan(u);
+  end tan;
+
+  function sinh "Hyperbolic sine"
+    extends Modelica.Icons.Function;
+    input Real u;
+    output Real y;
+  external "builtin" y = sinh(u);
+  end sinh;
+
+  function cosh "Hyperbolic cosine"
+    extends Modelica.Icons.Function;
+    input Real u;
+    output Real y;
+  external "builtin" y = cosh(u);
+  end cosh;
+
+  function tanh "Hyperbolic tangent"
+    extends Modelica.Icons.Function;
+    input Real u;
+    output Real y;
+  external "builtin" y = tanh(u);
+  end tanh;
+
+  function asin "Inverse sine"
+    extends Modelica.Icons.Function;
+    input Real u;
+    output Real y;
+  external "builtin" y = asin(u);
+  end asin;
+
+  function acos "Inverse cosine"
+    extends Modelica.Icons.Function;
+    input Real u;
+    output Real y;
+  external "builtin" y = acos(u);
+  end acos;
+
+  function atan "Inverse tangent"
+    extends Modelica.Icons.Function;
+    input Real u;
+    output Real y;
+  external "builtin" y = atan(u);
+  end atan;
+
+  function atan2 "Four quadrant inverse tangent"
+    extends Modelica.Icons.Function;
+    input Real u1;
+    input Real u2;
+    output Real y;
+  external "builtin" y = atan2(u1, u2);
+  end atan2;
+
   function sqrt "Square root"
     extends Modelica.Icons.Function;
     input Real u;
@@ -130,8 +224,9 @@ package Math "Mathematical functions"
   annotation (Documentation(info="<html><p>Standard mathematical functions.</p></html>"));
 end Math;
             """.trimIndent(),
-            size = 1200
+            size = 2500
         ),
+        // SIunits
         ProjectFile(
             id = "msl_siunits",
             name = "SIunits",
@@ -147,22 +242,405 @@ package SIunits "Type definitions based on SI units"
   type Time = Real(final quantity="Time", final unit="s");
   type Current = Real(final quantity="Current", final unit="A");
   type Temperature = Real(final quantity="Temperature", final unit="K");
+  type AmountOfSubstance = Real(final quantity="AmountOfSubstance", final unit="mol");
 
   // Derived units
   type Angle = Real(final quantity="Angle", final unit="rad");
   type Velocity = Real(final quantity="Velocity", final unit="m/s");
   type Acceleration = Real(final quantity="Acceleration", final unit="m/s2");
   type Force = Real(final quantity="Force", final unit="N");
+  type Pressure = Real(final quantity="Pressure", final unit="Pa");
+  type AbsolutePressure = Pressure;
   type Energy = Real(final quantity="Energy", final unit="J");
   type Power = Real(final quantity="Power", final unit="W");
+  type Frequency = Real(final quantity="Frequency", final unit="Hz");
 
   // Angular quantities
   type AngularVelocity = Real(final quantity="AngularVelocity", final unit="rad/s");
+  type AngularAcceleration = Real(final quantity="AngularAcceleration", final unit="rad/s2");
+
+  // Area and Volume
+  type Area = Real(final quantity="Area", final unit="m2");
+  type Volume = Real(final quantity="Volume", final unit="m3");
+
+  // Electrical
+  type Voltage = Real(final quantity="Voltage", final unit="V");
+  type Resistance = Real(final quantity="Resistance", final unit="Ohm");
+  type Conductance = Real(final quantity="Conductance", final unit="S");
+  type Capacitance = Real(final quantity="Capacitance", final unit="F");
+  type Inductance = Real(final quantity="Inductance", final unit="H");
+
+  // Thermal
+  type HeatFlowRate = Real(final quantity="HeatFlowRate", final unit="W");
+  type HeatCapacity = Real(final quantity="HeatCapacity", final unit="J/K");
+  type ThermalConductance = Real(final quantity="ThermalConductance", final unit="W/K");
+  type ThermalResistance = Real(final quantity="ThermalResistance", final unit="K/W");
+
+  // Mechanical
+  type Torque = Real(final quantity="Torque", final unit="N.m");
+  type Inertia = Real(final quantity="Inertia", final unit="kg.m2");
+  type Position = Length;
+  type RotationalSpringConstant = Real(final quantity="RotationalSpringConstant", final unit="N.m/rad");
+  type RotationalDampingConstant = Real(final quantity="RotationalDampingConstant", final unit="N.m.s/rad");
 
   annotation (Documentation(info="<html><p>SI unit type definitions.</p></html>"));
 end SIunits;
             """.trimIndent(),
-            size = 900
+            size = 2000
+        ),
+        // Blocks package
+        ProjectFile(
+            id = "msl_blocks",
+            name = "Blocks",
+            path = "Modelica/Blocks/package.mo",
+            content = """
+within Modelica;
+package Blocks "Library of basic input/output control blocks"
+  extends Modelica.Icons.Package;
+
+  package Interfaces "Connectors and partial models"
+    extends Modelica.Icons.InterfacesPackage;
+    connector RealInput = input Real;
+    connector RealOutput = output Real;
+    connector BooleanInput = input Boolean;
+    connector BooleanOutput = output Boolean;
+    partial block SISO "Single Input Single Output"
+      extends Modelica.Icons.Block;
+      RealInput u;
+      RealOutput y;
+    end SISO;
+    partial block SI2SO "Two Inputs Single Output"
+      extends Modelica.Icons.Block;
+      RealInput u1;
+      RealInput u2;
+      RealOutput y;
+    end SI2SO;
+  end Interfaces;
+
+  package Math "Mathematical blocks"
+    extends Modelica.Icons.Package;
+    block Gain "Output = k * input"
+      extends Interfaces.SISO;
+      parameter Real k(start=1);
+    equation
+      y = k * u;
+    end Gain;
+    block Add "Output = k1*u1 + k2*u2"
+      extends Interfaces.SI2SO;
+      parameter Real k1=1;
+      parameter Real k2=1;
+    equation
+      y = k1*u1 + k2*u2;
+    end Add;
+    block Product "Output = u1 * u2"
+      extends Interfaces.SI2SO;
+    equation
+      y = u1 * u2;
+    end Product;
+  end Math;
+
+  package Sources "Signal source blocks"
+    extends Modelica.Icons.SourcesPackage;
+    block Constant "Generate constant signal"
+      extends Interfaces.RealOutput;
+      parameter Real k(start=1);
+    equation
+      y = k;
+    end Constant;
+    block Step "Generate step signal"
+      extends Interfaces.RealOutput;
+      parameter Real height=1;
+      parameter Real offset=0;
+      parameter Real startTime=0;
+    equation
+      y = offset + (if time < startTime then 0 else height);
+    end Step;
+    block Sine "Generate sine signal"
+      extends Interfaces.RealOutput;
+      parameter Real amplitude=1;
+      parameter Real freqHz=1;
+      parameter Real phase=0;
+      parameter Real offset=0;
+    equation
+      y = offset + amplitude * Modelica.Math.sin(2*Modelica.Constants.pi*freqHz*time + phase);
+    end Sine;
+  end Sources;
+end Blocks;
+            """.trimIndent(),
+            size = 2500
+        ),
+        // Electrical package
+        ProjectFile(
+            id = "msl_electrical",
+            name = "Electrical",
+            path = "Modelica/Electrical/package.mo",
+            content = """
+within Modelica;
+package Electrical "Library for electrical models"
+  extends Modelica.Icons.Package;
+end Electrical;
+            """.trimIndent(),
+            size = 150
+        ),
+        // Electrical.Analog
+        ProjectFile(
+            id = "msl_electrical_analog",
+            name = "Analog",
+            path = "Modelica/Electrical/Analog/package.mo",
+            content = """
+within Modelica.Electrical;
+package Analog "Library for analog electrical models"
+  extends Modelica.Icons.Package;
+
+  package Interfaces "Connectors and partial models"
+    extends Modelica.Icons.InterfacesPackage;
+    connector Pin "Pin of an electrical component"
+      Modelica.SIunits.Voltage v;
+      flow Modelica.SIunits.Current i;
+    end Pin;
+    connector PositivePin "Positive pin"
+      Modelica.SIunits.Voltage v;
+      flow Modelica.SIunits.Current i;
+    end PositivePin;
+    connector NegativePin "Negative pin"
+      Modelica.SIunits.Voltage v;
+      flow Modelica.SIunits.Current i;
+    end NegativePin;
+    partial model OnePort "Component with two pins"
+      extends Modelica.Icons.Block;
+      PositivePin p;
+      NegativePin n;
+      Modelica.SIunits.Voltage v;
+      Modelica.SIunits.Current i;
+    equation
+      v = p.v - n.v;
+      0 = p.i + n.i;
+      i = p.i;
+    end OnePort;
+  end Interfaces;
+
+  package Basic "Basic electrical components"
+    extends Modelica.Icons.Package;
+    model Resistor "Ideal linear resistor"
+      extends Interfaces.OnePort;
+      parameter Modelica.SIunits.Resistance R(start=1);
+    equation
+      v = R*i;
+    end Resistor;
+    model Capacitor "Ideal linear capacitor"
+      extends Interfaces.OnePort;
+      parameter Modelica.SIunits.Capacitance C(start=1);
+    equation
+      i = C*der(v);
+    end Capacitor;
+    model Inductor "Ideal linear inductor"
+      extends Interfaces.OnePort;
+      parameter Modelica.SIunits.Inductance L(start=1);
+    equation
+      v = L*der(i);
+    end Inductor;
+  end Basic;
+
+  package Sources "Electrical sources"
+    extends Modelica.Icons.SourcesPackage;
+    model ConstantVoltage "Constant voltage source"
+      Interfaces.PositivePin p;
+      Interfaces.NegativePin n;
+      parameter Modelica.SIunits.Voltage V(start=1);
+    equation
+      p.v - n.v = V;
+      p.i + n.i = 0;
+    end ConstantVoltage;
+  end Sources;
+end Analog;
+            """.trimIndent(),
+            size = 2000
+        ),
+        // Mechanics package
+        ProjectFile(
+            id = "msl_mechanics",
+            name = "Mechanics",
+            path = "Modelica/Mechanics/package.mo",
+            content = """
+within Modelica;
+package Mechanics "Library for mechanical systems"
+  extends Modelica.Icons.Package;
+
+  package Rotational "Rotational mechanics"
+    extends Modelica.Icons.Package;
+
+    package Interfaces "Connectors"
+      extends Modelica.Icons.InterfacesPackage;
+      connector Flange_a "Flange with positive torque"
+        Modelica.SIunits.Angle phi;
+        flow Modelica.SIunits.Torque tau;
+      end Flange_a;
+      connector Flange_b "Flange with negative torque"
+        Modelica.SIunits.Angle phi;
+        flow Modelica.SIunits.Torque tau;
+      end Flange_b;
+    end Interfaces;
+
+    package Components "Rotational components"
+      extends Modelica.Icons.Package;
+      model Inertia "Rotational inertia"
+        Interfaces.Flange_a flange_a;
+        Interfaces.Flange_b flange_b;
+        parameter Modelica.SIunits.Inertia J(start=1);
+        Modelica.SIunits.AngularVelocity w;
+      equation
+        w = der(flange_a.phi);
+        flange_a.phi = flange_b.phi;
+        flange_a.tau + flange_b.tau = J*der(w);
+      end Inertia;
+      model Spring "Linear rotational spring"
+        Interfaces.Flange_a flange_a;
+        Interfaces.Flange_b flange_b;
+        parameter Modelica.SIunits.RotationalSpringConstant c(start=1);
+      equation
+        flange_a.tau = c*(flange_a.phi - flange_b.phi);
+        flange_a.tau + flange_b.tau = 0;
+      end Spring;
+      model Damper "Linear rotational damper"
+        Interfaces.Flange_a flange_a;
+        Interfaces.Flange_b flange_b;
+        parameter Modelica.SIunits.RotationalDampingConstant d(start=1);
+      equation
+        flange_a.tau = d*der(flange_a.phi - flange_b.phi);
+        flange_a.tau + flange_b.tau = 0;
+      end Damper;
+    end Components;
+  end Rotational;
+
+  package Translational "Translational mechanics"
+    extends Modelica.Icons.Package;
+
+    package Interfaces "Connectors"
+      extends Modelica.Icons.InterfacesPackage;
+      connector Flange_a "Flange with positive force"
+        Modelica.SIunits.Position s;
+        flow Modelica.SIunits.Force f;
+      end Flange_a;
+      connector Flange_b "Flange with negative force"
+        Modelica.SIunits.Position s;
+        flow Modelica.SIunits.Force f;
+      end Flange_b;
+    end Interfaces;
+  end Translational;
+end Mechanics;
+            """.trimIndent(),
+            size = 2500
+        ),
+        // Thermal package
+        ProjectFile(
+            id = "msl_thermal",
+            name = "Thermal",
+            path = "Modelica/Thermal/package.mo",
+            content = """
+within Modelica;
+package Thermal "Library for thermal systems"
+  extends Modelica.Icons.Package;
+end Thermal;
+            """.trimIndent(),
+            size = 150
+        ),
+        // Thermal.HeatTransfer
+        ProjectFile(
+            id = "msl_thermal_heattransfer",
+            name = "HeatTransfer",
+            path = "Modelica/Thermal/HeatTransfer/package.mo",
+            content = """
+within Modelica.Thermal;
+package HeatTransfer "Library for thermal heat transfer"
+  extends Modelica.Icons.Package;
+
+  package Interfaces "Connectors"
+    extends Modelica.Icons.InterfacesPackage;
+    connector HeatPort "Thermal port"
+      Modelica.SIunits.Temperature T;
+      flow Modelica.SIunits.HeatFlowRate Q_flow;
+    end HeatPort;
+    connector HeatPort_a = HeatPort;
+    connector HeatPort_b = HeatPort;
+  end Interfaces;
+
+  package Components "Thermal components"
+    extends Modelica.Icons.Package;
+    model HeatCapacitor "Lumped thermal element"
+      extends Interfaces.HeatPort;
+      parameter Modelica.SIunits.HeatCapacity C;
+      Modelica.SIunits.Temperature T;
+    equation
+      T = heatPort.T;
+      C*der(T) = heatPort.Q_flow;
+    end HeatCapacitor;
+    model ThermalConductor "Thermal conductor"
+      Interfaces.HeatPort_a heatPort_a;
+      Interfaces.HeatPort_b heatPort_b;
+      parameter Modelica.SIunits.ThermalConductance G;
+    equation
+      heatPort_a.Q_flow + heatPort_b.Q_flow = 0;
+      heatPort_a.Q_flow = G*(heatPort_a.T - heatPort_b.T);
+    end ThermalConductor;
+  end Components;
+
+  package Sources "Thermal sources"
+    extends Modelica.Icons.SourcesPackage;
+    model FixedTemperature "Fixed temperature"
+      parameter Modelica.SIunits.Temperature T;
+      Interfaces.HeatPort_b port;
+    equation
+      port.T = T;
+    end FixedTemperature;
+    model FixedHeatFlow "Fixed heat flow"
+      parameter Modelica.SIunits.HeatFlowRate Q_flow;
+      Interfaces.HeatPort_b port;
+    equation
+      port.Q_flow = -Q_flow;
+    end FixedHeatFlow;
+  end Sources;
+end HeatTransfer;
+            """.trimIndent(),
+            size = 1800
+        ),
+        // Fluid package
+        ProjectFile(
+            id = "msl_fluid",
+            name = "Fluid",
+            path = "Modelica/Fluid/package.mo",
+            content = """
+within Modelica;
+package Fluid "Library for fluid systems"
+  extends Modelica.Icons.Package;
+end Fluid;
+            """.trimIndent(),
+            size = 150
+        ),
+        // Media package
+        ProjectFile(
+            id = "msl_media",
+            name = "Media",
+            path = "Modelica/Media/package.mo",
+            content = """
+within Modelica;
+package Media "Library for media properties"
+  extends Modelica.Icons.Package;
+end Media;
+            """.trimIndent(),
+            size = 150
+        ),
+        // StateGraph package
+        ProjectFile(
+            id = "msl_stategraph",
+            name = "StateGraph",
+            path = "Modelica/StateGraph/package.mo",
+            content = """
+within Modelica;
+package StateGraph "Library for state graphs"
+  extends Modelica.Icons.Package;
+end StateGraph;
+            """.trimIndent(),
+            size = 150
         ),
         // Examples
         ProjectFile(

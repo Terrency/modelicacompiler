@@ -1,6 +1,7 @@
 package org.modelica.compiler.ast.nodes
 
 import org.modelica.compiler.lexer.SourceLocation
+import org.modelica.compiler.ast.visitor.ASTVisitor
 
 /**
  * AST节点基类
@@ -164,6 +165,7 @@ sealed class Modification {
  * 参数
  */
 sealed class Argument {
-    data class Named(val name: String, val value: Expression) : Argument()
+    data class Named(val name: String, val value: Expression?) : Argument()
     data class Positional(val value: Expression) : Argument()
+    data class ComponentModification(val name: String, val modification: Modification) : Argument()
 }

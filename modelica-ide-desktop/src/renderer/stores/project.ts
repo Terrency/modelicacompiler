@@ -5,12 +5,13 @@ import { ref, computed, reactive } from 'vue'
 interface TreeNode {
   id: string
   name: string
-  type: 'package' | 'class' | 'function' | 'file'
+  type: 'package' | 'class' | 'model' | 'function' | 'record' | 'block' | 'connector' | 'type' | 'file'
   path: string
   content?: string
   children: TreeNode[]
   isExpanded: boolean
   isLibrary: boolean
+  isNested?: boolean  // 是否是嵌套定义
 }
 
 interface OutputMessage {
@@ -27,7 +28,7 @@ interface CompileError {
   }
 }
 
-// 构建树形结构
+// 构建树形结构 - 优化版本：包节点直接显示内容
 function buildTree(files: { path: string; name: string; content: string; isLibrary: boolean }[]): TreeNode[] {
   const root: TreeNode = {
     id: 'root',
@@ -39,26 +40,77 @@ function buildTree(files: { path: string; name: string; content: string; isLibra
     isLibrary: false
   }
 
+  // 先按路径分组，识别package.mo文件
+  const packageMap = new Map<string, { content: string; isLibrary: boolean }>()
+  const otherFiles: typeof files = []
+
   files.forEach(file => {
+    // 检查是否是package.mo文件
+    if (file.path.endsWith('/package.mo')) {
+      const packagePath = file.path.replace('/package.mo', '')
+      packageMap.set(packagePath, { content: file.content, isLibrary: file.isLibrary })
+    } else {
+      otherFiles.push(file)
+    }
+  })
+
+  // 构建树结构
+  const processFile = (file: typeof files[0]) => {
     const parts = file.path.split('/')
     let current = root
 
     parts.forEach((part, index) => {
       const isLast = index === parts.length - 1
+      const currentPath = parts.slice(0, index + 1).join('/')
+      const existingChild = current.children.find(c => c.name === part)
+
+      if (existingChild) {
+        current = existingChild
+      } else {
+        // 检查当前路径是否是包（有package.mo）
+        const packageInfo = packageMap.get(currentPath)
+
+        const newNode: TreeNode = {
+          id: currentPath,
+          name: part,
+          type: isLast ? 'class' : 'package',
+          path: currentPath,
+          // 如果是包，直接赋予package.mo的内容
+          content: packageInfo ? packageInfo.content : (isLast ? file.content : undefined),
+          children: [],
+          isExpanded: index === 0, // 默认展开第一层
+          isLibrary: packageInfo ? packageInfo.isLibrary : file.isLibrary
+        }
+        current.children.push(newNode)
+        current = newNode
+      }
+    })
+  }
+
+  // 处理所有文件
+  otherFiles.forEach(processFile)
+
+  // 处理只有package.mo的包（没有其他文件）
+  packageMap.forEach((info, path) => {
+    const parts = path.split('/')
+    let current = root
+
+    parts.forEach((part, index) => {
+      const currentPath = parts.slice(0, index + 1).join('/')
       const existingChild = current.children.find(c => c.name === part)
 
       if (existingChild) {
         current = existingChild
       } else {
         const newNode: TreeNode = {
-          id: file.path,
+          id: currentPath,
           name: part,
-          type: isLast ? 'class' : 'package',
-          path: parts.slice(0, index + 1).join('/'),
-          content: isLast ? file.content : undefined,
+          type: 'package',
+          path: currentPath,
+          content: index === parts.length - 1 ? info.content : undefined,
           children: [],
-          isExpanded: index === 0, // 默认展开第一层
-          isLibrary: file.isLibrary
+          isExpanded: index === 0,
+          isLibrary: info.isLibrary
         }
         current.children.push(newNode)
         current = newNode
@@ -877,29 +929,41 @@ export const useProjectStore = defineStore('project', () => {
   )
 
   // 初始化 - 加载MSL
-  function loadStandardLibrary() {
+  async function loadStandardLibrary() {
     if (libraryLoaded.value) return
 
-    treeNodes.value = buildTree(MSL_FILES)
+    try {
+      // 加载新的 Modelica 层次结构数据
+      const libraryData = await import('../data/library-data-v2.json')
 
-    // 默认展开 Modelica 和 Examples 及其主要子包
-    expandedNodes.value.add('Modelica')
-    expandedNodes.value.add('Examples')
-    expandedNodes.value.add('Modelica/Math')
-    expandedNodes.value.add('Modelica/Blocks')
-    expandedNodes.value.add('Modelica/Electrical')
-    expandedNodes.value.add('Modelica/Mechanics')
-    expandedNodes.value.add('Modelica/Thermal')
-    expandedNodes.value.add('Modelica/Fluid')
-    expandedNodes.value.add('Modelica/Media')
-    expandedNodes.value.add('Modelica/StateGraph')
+      // 转换为 TreeNode 格式
+      function convertToTreeNode(data: any): TreeNode {
+        return {
+          id: data.path,
+          name: data.name,
+          type: data.type || 'package',
+          path: data.path,
+          content: data.content,
+          children: data.children ? data.children.map(convertToTreeNode) : [],
+          isExpanded: false,
+          isLibrary: data.isLibrary !== false,
+          isNested: data.isNested
+        }
+      }
 
-    libraryLoaded.value = true
+      treeNodes.value = [convertToTreeNode(libraryData.default || libraryData)]
 
-    // 打开 HelloWorld 作为默认文件
-    const helloWorld = findNodeByPath(treeNodes.value, 'Examples/HelloWorld.mo')
-    if (helloWorld) {
-      openFile(helloWorld)
+      // 默认展开 Modelica
+      expandedNodes.value.add('Modelica')
+
+      libraryLoaded.value = true
+
+      console.log('Modelica Standard Library loaded successfully')
+    } catch (error) {
+      console.error('Failed to load Modelica Standard Library:', error)
+      // 回退到旧的内联数据
+      treeNodes.value = buildTree(MSL_FILES)
+      libraryLoaded.value = true
     }
   }
 

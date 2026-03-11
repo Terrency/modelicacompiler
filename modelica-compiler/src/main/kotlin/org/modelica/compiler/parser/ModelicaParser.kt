@@ -201,6 +201,7 @@ class ModelicaParser(
                     }
                 }
                 check(TokenType.ANNOTATION) -> {
+                    advance() // 消耗 ANNOTATION token
                     parseAnnotation()
                 }
                 checkImportOrElement() -> {
@@ -289,7 +290,14 @@ class ModelicaParser(
         // 解析组件列表
         val components = parseComponentList()
 
-        consume(TokenType.SEMICOLON, "Expected ';' after component declaration")
+        // 解析可选的 annotation
+        val hasAnnotation = match(TokenType.ANNOTATION)
+        if (hasAnnotation) {
+            parseAnnotation()
+            // annotation 后面的分号已经被 parseAnnotation() 消耗了
+        } else {
+            consume(TokenType.SEMICOLON, "Expected ';' after component declaration")
+        }
 
         return ComponentDeclaration(prefixes, type, components)
     }
@@ -383,14 +391,26 @@ class ModelicaParser(
     }
 
     private fun parseModification(): Modification {
-        // 简化实现：解析修改内容
+        // 解析修改内容，支持嵌套修改
         val args = mutableListOf<Argument>()
         while (!check(TokenType.RPAREN) && !isAtEnd) {
             if (match(TokenType.IDENTIFIER)) {
                 val name = previous.lexeme
-                if (match(TokenType.EQUALS)) {
-                    val value = parseExpression()
-                    args.add(Argument.Named(name, value))
+                when {
+                    // 嵌套修改: name(...)
+                    match(TokenType.LPAREN) -> {
+                        val nestedMod = parseModification()
+                        args.add(Argument.ComponentModification(name, nestedMod))
+                    }
+                    // 命名参数: name = value
+                    match(TokenType.EQUALS) -> {
+                        val value = parseExpression()
+                        args.add(Argument.Named(name, value))
+                    }
+                    else -> {
+                        // 可能是数组索引或其他情况，暂时跳过
+                        args.add(Argument.Named(name, null))
+                    }
                 }
             } else {
                 val value = parseExpression()
@@ -425,7 +445,15 @@ class ModelicaParser(
         while (!check(TokenType.EQUATION, TokenType.ALGORITHM, TokenType.INITIAL,
             TokenType.PUBLIC, TokenType.PROTECTED, TokenType.END, TokenType.ANNOTATION) &&
             !isAtEnd) {
-            equations.add(parseEquation().copy(isInitial = true))
+            val equation = parseEquation()
+            // Set isInitial flag for initial equations
+            equations.add(when (equation) {
+                is Equation.Simple -> equation.copy(isInitial = true)
+                is Equation.Connect -> equation.copy(isInitial = true)
+                is Equation.For -> equation.copy(isInitial = true)
+                is Equation.If -> equation.copy(isInitial = true)
+                is Equation.When -> equation.copy(isInitial = true)
+            })
         }
 
         return equations
@@ -462,7 +490,15 @@ class ModelicaParser(
         consume(TokenType.COMMA, "Expected ',' in connect")
         val right = parseExpression()
         consume(TokenType.RPAREN, "Expected ')' after connect arguments")
-        consume(TokenType.SEMICOLON, "Expected ';' after connect")
+
+        // 解析可选的 annotation
+        val hasAnnotation = match(TokenType.ANNOTATION)
+        if (hasAnnotation) {
+            parseAnnotation()
+            // annotation 后面的分号已经被 parseAnnotation() 消耗了
+        } else {
+            consume(TokenType.SEMICOLON, "Expected ';' after connect")
+        }
 
         return Equation.Connect(left, right)
     }
@@ -836,7 +872,17 @@ class ModelicaParser(
 
     private fun parseIdentifierPath(): String {
         val parts = mutableListOf<String>()
-        parts.add(consume(TokenType.IDENTIFIER, "Expected identifier").lexeme)
+
+        // 接受标识符或内置类型关键字
+        val firstPart = when {
+            match(TokenType.IDENTIFIER) -> previous.lexeme
+            match(TokenType.REAL) -> previous.lexeme
+            match(TokenType.INTEGER) -> previous.lexeme
+            match(TokenType.BOOLEAN) -> previous.lexeme
+            match(TokenType.STRING) -> previous.lexeme
+            else -> throw ParseError("Expected identifier or built-in type", peek.location)
+        }
+        parts.add(firstPart)
 
         while (match(TokenType.DOT)) {
             parts.add(consume(TokenType.IDENTIFIER, "Expected identifier").lexeme)
@@ -852,7 +898,7 @@ class ModelicaParser(
     }
 
     private fun parseAnnotation() {
-        consume(TokenType.ANNOTATION, "Expected 'annotation'")
+        // ANNOTATION token 已经被 match() 消耗了
         // 跳过注解内容
         var depth = 0
         do {
@@ -862,7 +908,9 @@ class ModelicaParser(
                 else -> advance()
             }
         } while (depth > 0 && !isAtEnd)
-        consume(TokenType.SEMICOLON, "Expected ';' after annotation")
+
+        // 消耗可选的分号
+        match(TokenType.SEMICOLON)
     }
 
     // ==================== Token消费辅助方法 ====================

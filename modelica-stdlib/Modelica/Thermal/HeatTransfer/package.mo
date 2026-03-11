@@ -1,125 +1,75 @@
 within Modelica.Thermal;
-package HeatTransfer "Library for thermal heat transfer"
+package HeatTransfer "Library of 1-dimensional heat transfer with lumped elements"
   extends Modelica.Icons.Package;
 
   annotation (
-    Documentation(info="<html>
+     Icon(coordinateSystem(preserveAspectRatio = true, extent = {{-100,-100},{100,100}}), graphics={
+      Polygon(
+        origin = {13.758,27.517},
+        lineColor = {128,128,128},
+        fillColor = {192,192,192},
+        fillPattern = FillPattern.Solid,
+        points = {{-54,-6},{-61,-7},{-75,-15},{-79,-24},{-80,-34},{-78,-42},{-73,-49},{-64,-51},{-57,-51},{-47,-50},{-41,-43},{-38,-35},{-40,-27},{-40,-20},{-42,-13},{-47,-7},{-54,-5},{-54,-6}}),
+    Polygon(
+        origin = {13.758,27.517},
+        fillColor = {160,160,164},
+        fillPattern = FillPattern.Solid,
+        points = {{-75,-15},{-79,-25},{-80,-34},{-78,-42},{-72,-49},{-64,-51},{-57,-51},{-47,-50},{-57,-47},{-65,-45},{-71,-40},{-74,-33},{-76,-23},{-75,-15},{-75,-15}}),
+      Polygon(
+        origin = {13.758,27.517},
+        lineColor = {160,160,164},
+        fillColor = {192,192,192},
+        fillPattern = FillPattern.Solid,
+        points = {{39,-6},{32,-7},{18,-15},{14,-24},{13,-34},{15,-42},{20,-49},{29,-51},{36,-51},{46,-50},{52,-43},{55,-35},{53,-27},{53,-20},{51,-13},{46,-7},{39,-5},{39,-6}}),
+      Polygon(
+        origin = {13.758,27.517},
+        fillColor = {160,160,164},
+        fillPattern = FillPattern.Solid,
+        points = {{18,-15},{14,-25},{13,-34},{15,-42},{21,-49},{29,-51},{36,-51},{46,-50},{36,-47},{28,-45},{22,-40},{19,-33},{17,-23},{18,-15},{18,-15}}),
+      Polygon(
+        origin = {13.758,27.517},
+        lineColor = {191,0,0},
+        fillColor = {191,0,0},
+        fillPattern = FillPattern.Solid,
+        points = {{-9,-23},{-9,-10},{18,-17},{-9,-23}}),
+      Line(
+        origin = {13.758,27.517},
+        points = {{-41,-17},{-9,-17}},
+        color = {191,0,0},
+        thickness = 0.5),
+      Line(
+        origin = {13.758,27.517},
+        points = {{-17,-40},{15,-40}},
+        color = {191,0,0},
+        thickness = 0.5),
+      Polygon(
+        origin = {13.758,27.517},
+        lineColor = {191,0,0},
+        fillColor = {191,0,0},
+        fillPattern = FillPattern.Solid,
+        points = {{-17,-46},{-17,-34},{-40,-40},{-17,-46}})}),
+                            Documentation(info="<html>
 <p>
-This library contains thermal heat transfer components.
-</p>
+This package contains components to model <strong>1-dimensional heat transfer</strong>
+with lumped elements.</p>
+</html>", revisions="<html>
+<ul>
+<li><em>July 15, 2002</em>
+       by Michael Tiller, <a href=\"http://www.robotic.dlr.de/Martin.Otter/\">Martin Otter</a>
+       and Nikolaus Sch&uuml;rmann:<br>
+       Implemented.
+</li>
+<li><em>June 13, 2005</em>
+       by <a href=\"https://www.haumer.at/\">Anton Haumer</a><br>
+       Refined placing of connectors (cosmetic).<br>
+       Refined all Examples; removed Examples.FrequencyInverter, introducing Examples.Motor<br>
+       Introduced temperature dependent correction (1 + alpha*(T - T_ref)) in Fixed/PrescribedHeatFlow<br>
+</li>
+  <li> v1.1.1 2007/11/13 Anton Haumer<br>
+       components moved to sub-packages</li>
+  <li> v1.2.0 2009/08/26 Anton Haumer<br>
+       added component ThermalCollector</li>
+
+</ul>
 </html>"));
-
-  package Interfaces "Connectors and partial models"
-    extends Modelica.Icons.InterfacesPackage;
-
-    connector HeatPort "Thermal port for 1-dim. heat transfer"
-      Modelica.SIunits.Temperature T "Port temperature";
-      flow Modelica.SIunits.HeatFlowRate Q_flow "Heat flow rate (positive if flowing into the component)";
-    end HeatPort;
-
-    connector HeatPort_a "Thermal port for 1-dim. heat transfer (filled)"
-      extends HeatPort;
-    end HeatPort_a;
-
-    connector HeatPort_b "Thermal port for 1-dim. heat transfer (unfilled)"
-      extends HeatPort;
-    end HeatPort_b;
-
-    partial model PartialElementaryConditionalHeatPort
-      "Partial model to include a conditional HeatPort"
-      parameter Boolean useHeatPort=false "= true, if HeatPort is enabled";
-      parameter Modelica.SIunits.Temperature T=293.15
-        "Fixed device temperature if useHeatPort = false";
-      HeatPort_a heatPort(T(start=T)) "Conditional heat port";
-    equation
-      if not useHeatPort then
-        heatPort.T = T;
-      end if;
-    end PartialElementaryConditionalHeatPort;
-
-  end Interfaces;
-
-  package Components "Thermal components"
-    extends Modelica.Icons.Package;
-
-    model HeatCapacitor "Lumped thermal element storing heat"
-      extends Interfaces.HeatPort;
-      parameter Modelica.SIunits.HeatCapacity C "Heat capacity of element";
-      Modelica.SIunits.Temperature T "Temperature of element";
-    equation
-      T = heatPort.T;
-      C*der(T) = heatPort.Q_flow;
-    end HeatCapacitor;
-
-    model ThermalConductor "Lumped thermal element transporting heat"
-      extends Interfaces.HeatPort_a;
-      extends Interfaces.HeatPort_b;
-      parameter Modelica.SIunits.ThermalConductance G "Constant thermal conductance";
-    equation
-      heatPort_a.Q_flow + heatPort_b.Q_flow = 0;
-      heatPort_a.Q_flow = G*(heatPort_a.T - heatPort_b.T);
-    end ThermalConductor;
-
-    model ThermalResistor "Lumped thermal element transporting heat"
-      extends Interfaces.HeatPort_a;
-      extends Interfaces.HeatPort_b;
-      parameter Modelica.SIunits.ThermalResistance R "Constant thermal resistance";
-    equation
-      heatPort_a.Q_flow + heatPort_b.Q_flow = 0;
-      heatPort_a.Q_flow = (heatPort_a.T - heatPort_b.T)/R;
-    end ThermalResistor;
-
-    model ConvectiveConductor "Lumped thermal element for heat convection"
-      extends Interfaces.HeatPort_a;
-      extends Interfaces.HeatPort_b;
-      parameter Modelica.SIunits.CoefficientOfHeatTransfer Gc "Convective thermal conductance";
-    equation
-      heatPort_a.Q_flow + heatPort_b.Q_flow = 0;
-      heatPort_a.Q_flow = Gc*(heatPort_a.T - heatPort_b.T);
-    end ConvectiveConductor;
-
-    model BodyRadiation "Lumped thermal element for radiation"
-      extends Interfaces.HeatPort_a;
-      extends Interfaces.HeatPort_b;
-      parameter Real Gr(unit="m2") "Radiation conductance";
-    equation
-      heatPort_a.Q_flow + heatPort_b.Q_flow = 0;
-      heatPort_a.Q_flow = Gr*Modelica.Constants.sigma*(heatPort_a.T^4 - heatPort_b.T^4);
-    end BodyRadiation;
-
-  end Components;
-
-  package Sources "Thermal sources"
-    extends Modelica.Icons.SourcesPackage;
-
-    model FixedTemperature "Fixed temperature boundary condition"
-      parameter Modelica.SIunits.Temperature T "Fixed temperature at port";
-      Interfaces.HeatPort_b port;
-    equation
-      port.T = T;
-    end FixedTemperature;
-
-    model PrescribedTemperature "Prescribed temperature boundary condition"
-      Interfaces.HeatPort_b port;
-      Modelica.Blocks.Interfaces.RealInput T(unit="K") "Prescribed temperature";
-    equation
-      port.T = T;
-    end PrescribedTemperature;
-
-    model FixedHeatFlow "Fixed heat flow boundary condition"
-      parameter Modelica.SIunits.HeatFlowRate Q_flow "Fixed heat flow rate at port";
-      Interfaces.HeatPort_b port;
-    equation
-      port.Q_flow = -Q_flow;
-    end FixedHeatFlow;
-
-    model PrescribedHeatFlow "Prescribed heat flow boundary condition"
-      Interfaces.HeatPort_b port;
-      Modelica.Blocks.Interfaces.RealInput Q_flow(unit="W") "Prescribed heat flow rate";
-    equation
-      port.Q_flow = -Q_flow;
-    end PrescribedHeatFlow;
-
-  end Sources;
-
 end HeatTransfer;

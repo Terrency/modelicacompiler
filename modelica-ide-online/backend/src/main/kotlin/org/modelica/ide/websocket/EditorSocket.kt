@@ -40,7 +40,7 @@ object SessionManager {
         return sessions[projectId]?.toList() ?: emptyList()
     }
 
-    fun broadcast(projectId: String, message: String, excludeSession: EditorSession? = null) {
+    suspend fun broadcast(projectId: String, message: String, excludeSession: EditorSession? = null) {
         getSessions(projectId)
             .filter { it != excludeSession }
             .forEach { session ->
@@ -56,7 +56,7 @@ object SessionManager {
 @Serializable
 data class SocketMessage(
     val type: String,
-    val payload: Map<String, Any?> = emptyMap()
+    val payload: Map<String, String> = emptyMap()
 )
 
 fun Route.editorSocket() {
@@ -81,10 +81,7 @@ fun Route.editorSocket() {
                 SocketMessage("connected", mapOf(
                     "sessionId" to sessionId,
                     "userId" to userId,
-                    "userName" to userName,
-                    "users" to SessionManager.getSessions(projectId).map {
-                        mapOf("userId" to it.userId, "userName" to it.userName)
-                    }
+                    "userName" to userName
                 ))
             )
             send(welcomeMsg)
@@ -122,7 +119,7 @@ fun Route.editorSocket() {
             val leaveMsg = json.encodeToString(
                 SocketMessage("user_left", mapOf("userId" to userId))
             )
-            SessionManager.broadcast(projectId, leaveMsg)
+            SessionManager.broadcast(projectId, leaveMsg, session)
         }
     }
 }

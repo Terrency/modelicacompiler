@@ -26,7 +26,7 @@
       </span>
 
       <!-- 节点名称 -->
-      <span class="node-name">{{ node.name }}</span>
+      <span class="node-name">{{ node.name.replace('.mo', '') }}</span>
     </div>
 
     <!-- 子节点 -->
@@ -76,24 +76,34 @@ const hasContent = computed(() => props.node.content !== undefined)
 const isExpanded = computed(() => props.expandedIds.has(props.node.path))
 
 function getNodeIcon(): string {
-  if (hasChildren.value) {
-    // 包/目录
-    if (props.node.name === 'Modelica') return '📚'
-    if (props.node.name === 'Examples') return '📝'
-    if (props.node.name === 'Math') return '🔢'
-    if (props.node.name === 'Icons') return '🎨'
-    if (props.node.name === 'Constants') return '📐'
-    if (props.node.name === 'SIunits') return '📏'
-    return '📁'
+  // 根据类型显示图标
+  switch (props.node.type) {
+    case 'package':
+      if (props.node.name === 'Modelica') return '📚'
+      if (props.node.name === 'Examples') return '📝'
+      if (props.node.name === 'Math') return '🔢'
+      if (props.node.name === 'Icons') return '🎨'
+      if (props.node.name === 'Constants') return '📐'
+      if (props.node.name === 'SIunits') return '📏'
+      return '📁'
+    case 'model':
+      return '🔬'
+    case 'class':
+      return '📦'
+    case 'function':
+      return '⚡'
+    case 'record':
+      return '📋'
+    case 'block':
+      return '🧱'
+    case 'connector':
+      return '🔌'
+    case 'type':
+      return '📐'
+    default:
+      if (props.node.isLibrary) return '📦'
+      return '📄'
   }
-  // 文件
-  if (props.node.name === 'HelloWorld') return '👋'
-  if (props.node.name === 'SimplePendulum') return '🔄'
-  if (props.node.name === 'BouncingBall') return '⚽'
-  if (props.node.name === 'DCMotor') return '⚡'
-  if (props.node.name === 'LorenzSystem') return '🌀'
-  if (props.node.isLibrary) return '📦'
-  return '📄'
 }
 
 function handleToggle() {

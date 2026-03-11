@@ -185,13 +185,22 @@ async function compile() {
   try {
     const result = await window.electronAPI.compileCode(currentFile.value.content || '')
 
+    // 显示编译日志
+    if (result.output && Array.isArray(result.output)) {
+      result.output.forEach((line: string) => {
+        store.addOutput(line)
+      })
+    }
+
     if (result.success) {
-      store.addOutput('Compilation successful!')
       statusText.value = 'Compilation successful'
     } else {
       store.addError(result.error || 'Compilation failed')
       statusText.value = 'Compilation failed'
     }
+
+    // 自动切换到输出面板
+    rightPanelTab.value = 'output'
   } catch (error) {
     store.addError(String(error))
     statusText.value = 'Compilation error'

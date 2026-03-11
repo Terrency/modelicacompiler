@@ -72,17 +72,130 @@ ipcMain.handle('save-file', async (_event, path: string, content: string) => {
 
 // 编译器桥接函数（实际实现会调用Kotlin编译器）
 async function compileModelicaCode(code: string): Promise<any> {
-  // TODO: 实现与Kotlin编译器的桥接
-  // 可以通过以下方式：
-  // 1. 子进程调用Java/Kotlin编译器JAR
-  // 2. 使用JNI直接调用
-  // 3. 使用gRPC/HTTP调用编译服务
+  const { spawn } = require('child_process')
+  const path = require('path')
 
-  return {
-    success: true,
-    message: 'Compilation successful',
-    output: []
-  }
+  return new Promise((resolve) => {
+    const outputLines: string[] = []
+    const errorLines: string[] = []
+
+    // 添加编译开始日志
+    outputLines.push('=== Modelica Compiler ===')
+    outputLines.push(`[${new Date().toISOString()}] Starting compilation...`)
+    outputLines.push(`[${new Date().toISOString()}] Code length: ${code.length} bytes`)
+    outputLines.push('')
+
+    // 获取 JAR 路径
+    const jarPath = path.join(__dirname, '../../native/libs/native-1.0.0-SNAPSHOT.jar')
+
+    // 检查 JAR 是否存在
+    const fs = require('fs')
+    if (!fs.existsSync(jarPath)) {
+      outputLines.push(`[${new Date().toISOString()}] ERROR: Compiler JAR not found at: ${jarPath}`)
+      resolve({
+        success: false,
+        error: 'Compiler JAR not found',
+        output: outputLines
+      })
+      return
+    }
+
+    outputLines.push(`[${new Date().toISOString()}] Compiler JAR: ${jarPath}`)
+
+    // 创建临时文件
+    const os = require('os')
+    const tempDir = os.tmpdir()
+    const tempFile = path.join(tempDir, `modelica_temp_${Date.now()}.mo`)
+
+    try {
+      fs.writeFileSync(tempFile, code, 'utf-8')
+      outputLines.push(`[${new Date().toISOString()}] Temp file: ${tempFile}`)
+      outputLines.push(`[${new Date().toISOString()}] Invoking compiler...`)
+      outputLines.push('')
+
+      // 调用 Java 编译器 (使用 file 命令)
+      const javaProcess = spawn('java', ['-jar', jarPath, 'file', tempFile], {
+        stdio: ['pipe', 'pipe', 'pipe']
+      })
+
+    // 捕获标准输出
+      javaProcess.stdout.on('data', (data: Buffer) => {
+        const lines = data.toString().split('\n')
+        lines.forEach((line: string) => {
+          if (line.trim()) {
+            outputLines.push(line)
+          }
+        })
+      })
+
+      // 捕获标准错误
+      javaProcess.stderr.on('data', (data: Buffer) => {
+        const lines = data.toString().split('\n')
+        lines.forEach((line: string) => {
+          if (line.trim()) {
+            errorLines.push(line)
+          }
+        })
+      })
+
+      // 处理编译完成
+      javaProcess.on('close', (code: number) => {
+        // 清理临时文件
+        try {
+          fs.unlinkSync(tempFile)
+        } catch (e) {
+          // 忽略清理错误
+        }
+
+        outputLines.push('')
+        outputLines.push(`[${new Date().toISOString()}] Compilation ${code === 0 ? 'succeeded' : 'failed'} (exit code: ${code})`)
+
+        if (errorLines.length > 0) {
+          outputLines.push('')
+          outputLines.push('=== Compiler Errors ===')
+          errorLines.forEach(line => outputLines.push(line))
+        }
+
+        resolve({
+          success: code === 0,
+          error: code !== 0 ? 'Compilation failed' : undefined,
+          output: outputLines
+        })
+      })
+
+      // 处理编译错误
+      javaProcess.on('error', (error: Error) => {
+        // 清理临时文件
+        try {
+          fs.unlinkSync(tempFile)
+        } catch (e) {
+          // 忽略清理错误
+        }
+
+        outputLines.push('')
+        outputLines.push(`[${new Date().toISOString()}] ERROR: Failed to start compiler`)
+        outputLines.push(`Error: ${error.message}`)
+        outputLines.push('')
+        outputLines.push('Make sure Java is installed and available in PATH')
+
+        resolve({
+          success: false,
+          error: error.message,
+          output: outputLines
+        })
+      })
+    } catch (error: any) {
+      outputLines.push('')
+      outputLines.push(`[${new Date().toISOString()}] ERROR: Failed to create temp file`)
+      outputLines.push(`Error: ${error.message}`)
+
+      resolve({
+        success: false,
+        error: error.message,
+        output: outputLines
+      })
+    }
+  })
 }
 
 // App lifecycle

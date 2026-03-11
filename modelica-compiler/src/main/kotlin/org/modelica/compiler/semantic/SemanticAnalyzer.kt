@@ -52,7 +52,7 @@ data class SemanticResult(
  *
  * 执行类型检查、作用域分析和符号解析
  */
-class SemanticAnalyzer : DefaultVisitor<Unit> {
+class SemanticAnalyzer : DefaultVisitor<Unit>(Unit) {
 
     private val symbolTable = SymbolTable()
     private val errors = mutableListOf<SemanticError>()
@@ -208,8 +208,12 @@ class SemanticAnalyzer : DefaultVisitor<Unit> {
             is Modification.Value -> analyzeExpression(mod.expression)
             is Modification.Arguments -> mod.args.forEach { arg ->
                 when (arg) {
-                    is Argument.Named -> analyzeExpression(arg.value)
+                    is Argument.Named -> arg.value?.let { analyzeExpression(it) }
                     is Argument.Positional -> analyzeExpression(arg.value)
+                    is Argument.ComponentModification -> {
+                        // 嵌套组件修改，递归分析
+                        analyzeModification(arg.modification)
+                    }
                 }
             }
         }

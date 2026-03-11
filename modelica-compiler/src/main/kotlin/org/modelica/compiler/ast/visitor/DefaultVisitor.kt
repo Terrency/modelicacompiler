@@ -32,18 +32,26 @@ open class DefaultVisitor<T>(protected val defaultValue: T) : ASTVisitor<T> {
     override fun visitComponentDeclaration(node: ComponentDeclaration): T {
         node.components.forEach { component ->
             component.modification?.let { mod ->
-                when (mod) {
-                    is Modification.Value -> mod.expression.accept(this)
-                    is Modification.Arguments -> mod.args.forEach { arg ->
-                        when (arg) {
-                            is Argument.Named -> arg.value.accept(this)
-                            is Argument.Positional -> arg.value.accept(this)
-                        }
+                processModification(mod)
+            }
+        }
+        return defaultValue
+    }
+
+    private fun processModification(mod: Modification) {
+        when (mod) {
+            is Modification.Value -> mod.expression.accept(this)
+            is Modification.Arguments -> mod.args.forEach { arg ->
+                when (arg) {
+                    is Argument.Named -> arg.value?.accept(this)
+                    is Argument.Positional -> arg.value.accept(this)
+                    is Argument.ComponentModification -> {
+                        // 嵌套组件修改，递归处理
+                        processModification(arg.modification)
                     }
                 }
             }
         }
-        return defaultValue
     }
 
     // 方程

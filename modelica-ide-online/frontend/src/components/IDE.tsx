@@ -74,7 +74,7 @@ export default function IDE() {
   const [output, setOutput] = useState<string[]>([])
   const [errors, setErrors] = useState<any[]>([])
 
-  const { currentFile, setCurrentFile, updateFileContent, compile } = useProjectStore()
+  const { currentFile, updateFileContent, compile } = useProjectStore()
   const { connected, users, sendMessage } = useWebSocket(projectId || '')
 
   // 初始化Monaco编辑器
@@ -132,8 +132,9 @@ export default function IDE() {
   useEffect(() => {
     if (editorInstance.current && currentFile) {
       const currentValue = editorInstance.current.getValue()
-      if (currentValue !== currentFile.content) {
-        editorInstance.current.setValue(currentFile.content)
+      const content = currentFile.content || ''
+      if (currentValue !== content) {
+        editorInstance.current.setValue(content)
       }
     }
   }, [currentFile])

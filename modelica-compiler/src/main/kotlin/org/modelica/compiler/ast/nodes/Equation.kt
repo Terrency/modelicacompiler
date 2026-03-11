@@ -1,6 +1,7 @@
 package org.modelica.compiler.ast.nodes
 
 import org.modelica.compiler.lexer.SourceLocation
+import org.modelica.compiler.ast.visitor.ASTVisitor
 
 /**
  * 方程基类

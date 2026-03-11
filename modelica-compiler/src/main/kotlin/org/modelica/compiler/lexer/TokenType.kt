@@ -62,6 +62,7 @@ enum class TokenType(val lexeme: String = "", val description: String) {
     CONNECT("connect", "连接语句"),
 
     // 关键字 - 其他
+    END("end", "结束关键字"),
     ANNOTATION("annotation", "注解关键字"),
     EXTERNAL("external", "外部函数关键字"),
     IMPORT("import", "导入关键字"),
@@ -138,7 +139,7 @@ enum class TokenType(val lexeme: String = "", val description: String) {
     companion object {
         /** 关键字映射表 */
         val keywords: Map<String, TokenType> by lazy {
-            entries.filter { it.lexeme.isNotEmpty() && it.description.contains("关键字") }
+            entries.filter { it.lexeme.isNotEmpty() }
                 .associateBy { it.lexeme }
         }
 

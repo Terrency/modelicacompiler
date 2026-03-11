@@ -147,10 +147,10 @@ class IRBuilder {
                 ))
             }
             is org.modelica.compiler.ast.nodes.Equation.If -> {
-                val elseBranch = equation.elseBranch?.map { buildEquation(it) }.flatten() ?: emptyList()
+                val elseBranch = equation.elseBranch?.flatMap { buildEquation(it) } ?: emptyList()
                 listOf(IRStatement.If(
                     condition = buildExpression(equation.condition),
-                    thenBranch = equation.thenBranch.map { buildEquation(it) }.flatten(),
+                    thenBranch = equation.thenBranch.flatMap { buildEquation(it) },
                     elseBranch = elseBranch
                 ))
             }
@@ -179,10 +179,10 @@ class IRBuilder {
                 listOf(IRStatement.ExpressionStatement(buildExpression(stmt.call)))
             }
             is org.modelica.compiler.ast.nodes.Statement.If -> {
-                val elseBranch = stmt.elseBranch?.map { buildStatement(it) }.flatten() ?: emptyList()
+                val elseBranch = stmt.elseBranch?.flatMap { buildStatement(it) } ?: emptyList()
                 listOf(IRStatement.If(
                     condition = buildExpression(stmt.condition),
-                    thenBranch = stmt.thenBranch.map { buildStatement(it) }.flatten(),
+                    thenBranch = stmt.thenBranch.flatMap { buildStatement(it) },
                     elseBranch = elseBranch
                 ))
             }

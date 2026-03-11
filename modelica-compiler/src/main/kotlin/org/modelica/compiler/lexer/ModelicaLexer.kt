@@ -81,9 +81,6 @@ class ModelicaLexer(
 
             // 操作符和分隔符
             else -> scanOperatorOrDelimiter()
-        }?.also { token ->
-            // 更新位置
-            repeat(token.lexeme.length) { advance() }
         }
     }
 
@@ -239,16 +236,13 @@ class ModelicaLexer(
             if (currentChar == '\\') {
                 advance() // 跳过转义字符
                 if (currentChar != null) {
-                    advance()
+                    advance() // 跳过转义后的字符
                 }
             } else if (currentChar == '\n') {
-                // Modelica不支持多行字符串
-                errors.add(LexerError(
-                    "Unterminated string literal",
-                    startLocation,
-                    LexerErrorType.UNTERMINATED_STRING
-                ))
-                break
+                // 允许多行字符串（用于 HTML 文档等）
+                line++
+                column = 1
+                advance()
             } else {
                 advance()
             }

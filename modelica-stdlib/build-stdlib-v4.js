@@ -18,7 +18,7 @@ const { execSync } = require('child_process');
 const STDLIB_DIR = __dirname;
 const OUTPUT_DIR = path.join(__dirname, 'compiled-stdlib');
 let JAR_OUTPUT = path.join(__dirname, 'modelica-stdlib.jar');
-const COMPILER_JAR = path.join(__dirname, '../modelica-ide-desktop/native/libs/native-1.0.0-SNAPSHOT.jar');
+const COMPILER_JAR = path.join(__dirname, '../modelica-compiler/build/libs/modelica-compiler-1.0.0-SNAPSHOT.jar');
 
 console.log('╔══════════════════════════════════════════════════╗');
 console.log('║   Modelica 标准库编译器 v4.0                    ║');

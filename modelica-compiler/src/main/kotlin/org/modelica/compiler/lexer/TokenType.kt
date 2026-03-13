@@ -74,6 +74,7 @@ enum class TokenType(val lexeme: String = "", val description: String) {
     EACH("each", "each关键字"),
     INNER("inner", "inner关键字"),
     OUTER("outer", "outer关键字"),
+    WITHIN("within", "within关键字"),
 
     // 布尔字面量
     TRUE("true", "布尔真值"),

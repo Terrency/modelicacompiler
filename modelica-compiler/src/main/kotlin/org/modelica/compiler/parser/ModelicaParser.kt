@@ -34,6 +34,14 @@ class ModelicaParser(
         val classes = mutableListOf<ClassDefinition>()
         val imports = mutableListOf<ImportClause>()
 
+        // 跳过开头的within语句
+        while (match(TokenType.WITHIN)) {
+            // 解析包路径（例如：Modelica.Blocks）
+            val packagePath = parseIdentifierPath()
+            consume(TokenType.SEMICOLON, "Expected ';' after within statement")
+            // within语句用于确定包层次，这里暂时忽略
+        }
+
         while (!isAtEnd) {
             try {
                 when {

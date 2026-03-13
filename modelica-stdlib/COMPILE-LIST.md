@@ -93,10 +93,10 @@
 - ✅ 支持：parameter定义
 - ✅ 支持：equation段
 - ✅ 支持：der()导数
-- ❌ 不支持：package嵌套定义
-- ❌ 不支持：type定义
-- ❌ 不支持：connector定义
-- ❌ 不支持：block定义
+- ✅ 支持：package嵌套定义（2026-03-13新增）
+- ✅ 支持：type定义（2026-03-13新增）
+- ✅ 支持：connector定义（2026-03-13新增）
+- ✅ 支持：block定义（2026-03-13新增）
 - ❌ 不支持：function定义
 - ❌ 不支持：external函数
 

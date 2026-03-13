@@ -183,6 +183,11 @@ class ModelicaParser(
 
         while (!check(TokenType.END) && !isAtEnd) {
             when {
+                // 支持嵌套的类定义（包括package）
+                checkClassPrefix() -> {
+                    val nestedClass = parseClass()
+                    elements.add(NestedClassElement(nestedClass))
+                }
                 check(TokenType.PUBLIC, TokenType.PROTECTED) -> {
                     val section = parsePublicProtectedSection()
                     elements.addAll(section)

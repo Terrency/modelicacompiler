@@ -103,6 +103,17 @@ data class ExtendsClause(
 }
 
 /**
+ * 嵌套类元素
+ * 用于支持package和其他类定义内的嵌套类定义
+ */
+data class NestedClassElement(
+    val classDefinition: ClassDefinition,
+    override val location: SourceLocation? = classDefinition.location
+) : Element {
+    override fun <T> accept(visitor: ASTVisitor<T>): T = visitor.visitNestedClassElement(this)
+}
+
+/**
  * 类型前缀
  */
 data class TypePrefixes(

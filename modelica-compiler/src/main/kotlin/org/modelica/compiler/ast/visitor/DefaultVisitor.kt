@@ -38,6 +38,11 @@ open class DefaultVisitor<T>(protected val defaultValue: T) : ASTVisitor<T> {
         return defaultValue
     }
 
+    override fun visitNestedClassElement(node: NestedClassElement): T {
+        node.classDefinition.accept(this)
+        return defaultValue
+    }
+
     private fun processModification(mod: Modification) {
         when (mod) {
             is Modification.Value -> mod.expression.accept(this)

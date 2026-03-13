@@ -1,6 +1,6 @@
 # Modelica 标准库 - 可执行模型清单
 
-生成时间: 2026-03-13T00:41:55.417Z
+生成时间: 2026-03-13T01:59:06.335Z
 
 ## 统计概览
 
@@ -11,9 +11,10 @@
 
 ### Blocks (276 个)
 
+- Modelica.ActuatorWithNoise
+- Modelica.Blocks
 - Modelica.Blocks.Abs
 - Modelica.Blocks.Acos
-- Modelica.Blocks.ActuatorWithNoise
 - Modelica.Blocks.Adaptors
 - Modelica.Blocks.Add
 - Modelica.Blocks.Add3
@@ -23,10 +24,8 @@
 - Modelica.Blocks.Atan
 - Modelica.Blocks.Atan2
 - Modelica.Blocks.BandLimitedWhiteNoise
-- Modelica.Blocks.Blocks
 - Modelica.Blocks.BooleanChange
 - Modelica.Blocks.BooleanConstant
-- Modelica.Blocks.BooleanNetwork1
 - Modelica.Blocks.BooleanPassThrough
 - Modelica.Blocks.BooleanPulse
 - Modelica.Blocks.BooleanReplicator
@@ -35,8 +34,6 @@
 - Modelica.Blocks.BooleanToInteger
 - Modelica.Blocks.BooleanToReal
 - Modelica.Blocks.BooleanValue
-- Modelica.Blocks.BusUsage
-- Modelica.Blocks.BusUsage_Utilities
 - Modelica.Blocks.Change
 - Modelica.Blocks.ChangingEdge
 - Modelica.Blocks.CombiTable1Ds
@@ -49,7 +46,6 @@
 - Modelica.Blocks.Continuous
 - Modelica.Blocks.ContinuousClock
 - Modelica.Blocks.ContinuousMean
-- Modelica.Blocks.Controller
 - Modelica.Blocks.Cos
 - Modelica.Blocks.Cosh
 - Modelica.Blocks.Cosine
@@ -62,17 +58,14 @@
 - Modelica.Blocks.DeMultiplex4
 - Modelica.Blocks.DeMultiplex5
 - Modelica.Blocks.DeMultiplex6
-- Modelica.Blocks.Densities
 - Modelica.Blocks.Der
 - Modelica.Blocks.Derivative
 - Modelica.Blocks.Discrete
 - Modelica.Blocks.DiscreteBlock
 - Modelica.Blocks.Division
-- Modelica.Blocks.DrydenContinuousTurbulence
 - Modelica.Blocks.Edge
 - Modelica.Blocks.Edge
 - Modelica.Blocks.ExampleCTable
-- Modelica.Blocks.Examples
 - Modelica.Blocks.Exp
 - Modelica.Blocks.Exponentials
 - Modelica.Blocks.ExpSine
@@ -83,9 +76,6 @@
 - Modelica.Blocks.Feedback
 - Modelica.Blocks.Filter
 - Modelica.Blocks.Filter
-- Modelica.Blocks.Filter
-- Modelica.Blocks.FilterWithDifferentiation
-- Modelica.Blocks.FilterWithRiseTime
 - Modelica.Blocks.FirstOrder
 - Modelica.Blocks.FirstOrderHold
 - Modelica.Blocks.FixedDelay
@@ -111,10 +101,8 @@
 - Modelica.Blocks.GreaterThreshold
 - Modelica.Blocks.Harmonic
 - Modelica.Blocks.Hysteresis
-- Modelica.Blocks.ImpureRandom
 - Modelica.Blocks.IntegerChange
 - Modelica.Blocks.IntegerConstant
-- Modelica.Blocks.IntegerNetwork1
 - Modelica.Blocks.IntegerPassThrough
 - Modelica.Blocks.IntegerReplicator
 - Modelica.Blocks.IntegerStep
@@ -124,12 +112,10 @@
 - Modelica.Blocks.IntegerValue
 - Modelica.Blocks.Integrator
 - Modelica.Blocks.Interaction
-- Modelica.Blocks.Interaction1
 - Modelica.Blocks.Interfaces
 - Modelica.Blocks.Internal
 - Modelica.Blocks.Internal
 - Modelica.Blocks.InverseBlockConstraints
-- Modelica.Blocks.InverseModel
 - Modelica.Blocks.KinematicPTP
 - Modelica.Blocks.KinematicPTP2
 - Modelica.Blocks.Less
@@ -146,7 +132,6 @@
 - Modelica.Blocks.LogFrequencySweep
 - Modelica.Blocks.Logical
 - Modelica.Blocks.LogicalDelay
-- Modelica.Blocks.LogicalNetwork1
 - Modelica.Blocks.LogicalSwitch
 - Modelica.Blocks.LowpassButterworth
 - Modelica.Blocks.Math
@@ -157,8 +142,6 @@
 - Modelica.Blocks.Mean
 - Modelica.Blocks.Min
 - Modelica.Blocks.MinMax
-- Modelica.Blocks.Modulation
-- Modelica.Blocks.MotorWithCurrentControl
 - Modelica.Blocks.Multiplex
 - Modelica.Blocks.Multiplex2
 - Modelica.Blocks.Multiplex3
@@ -174,13 +157,10 @@
 - Modelica.Blocks.Nand
 - Modelica.Blocks.Nand
 - Modelica.Blocks.Noise
-- Modelica.Blocks.Noise
 - Modelica.Blocks.Nonlinear
 - Modelica.Blocks.Nor
 - Modelica.Blocks.Nor
-- Modelica.Blocks.NormalDensity
 - Modelica.Blocks.NormalNoise
-- Modelica.Blocks.NormalNoiseProperties
 - Modelica.Blocks.Not
 - Modelica.Blocks.Not
 - Modelica.Blocks.OnDelay
@@ -188,12 +168,9 @@
 - Modelica.Blocks.Or
 - Modelica.Blocks.Or
 - Modelica.Blocks.PadeDelay
-- Modelica.Blocks.Part
 - Modelica.Blocks.PartialNoise
-- Modelica.Blocks.Parts
 - Modelica.Blocks.PI
 - Modelica.Blocks.PID
-- Modelica.Blocks.PID_Controller
 - Modelica.Blocks.PolarToRectangular
 - Modelica.Blocks.PotentialToFlowAdaptor
 - Modelica.Blocks.Power
@@ -204,15 +181,12 @@
 - Modelica.Blocks.Pythagoras
 - Modelica.Blocks.RadioButtonSource
 - Modelica.Blocks.Ramp
-- Modelica.Blocks.RealNetwork1
 - Modelica.Blocks.RealPassThrough
 - Modelica.Blocks.RealToBoolean
 - Modelica.Blocks.RealToInteger
 - Modelica.Blocks.RealValue
 - Modelica.Blocks.RectangularToPolar
 - Modelica.Blocks.RectifiedMean
-- Modelica.Blocks.Rectifier12pulseFFT
-- Modelica.Blocks.Rectifier6pulseFFT
 - Modelica.Blocks.Replicator
 - Modelica.Blocks.RisingEdge
 - Modelica.Blocks.RootMeanSquare
@@ -226,11 +200,9 @@
 - Modelica.Blocks.Sign
 - Modelica.Blocks.Sin
 - Modelica.Blocks.Sinc
-- Modelica.Blocks.SinCosEncoder
 - Modelica.Blocks.Sine
 - Modelica.Blocks.SineVariableFrequencyAndAmplitude
 - Modelica.Blocks.Sinh
-- Modelica.Blocks.SlewRateLimiter
 - Modelica.Blocks.SlewRateLimiter
 - Modelica.Blocks.Sources
 - Modelica.Blocks.Sqrt
@@ -262,7 +234,6 @@
 - Modelica.Blocks.To_minute
 - Modelica.Blocks.To_rpm
 - Modelica.Blocks.TotalHarmonicDistortion
-- Modelica.Blocks.TotalHarmonicDistortion
 - Modelica.Blocks.TransferFunction
 - Modelica.Blocks.TransferFunction
 - Modelica.Blocks.Trapezoid
@@ -271,22 +242,51 @@
 - Modelica.Blocks.TriggeredSampler
 - Modelica.Blocks.TriggeredTrapezoid
 - Modelica.Blocks.TruncatedNormalNoise
-- Modelica.Blocks.UniformDensity
 - Modelica.Blocks.UniformNoise
-- Modelica.Blocks.UniformNoiseProperties
 - Modelica.Blocks.UnitConversions
 - Modelica.Blocks.UnitDelay
-- Modelica.Blocks.Utilities
 - Modelica.Blocks.Utilities
 - Modelica.Blocks.VariableDelay
 - Modelica.Blocks.VariableLimiter
 - Modelica.Blocks.Variance
-- Modelica.Blocks.WeibullDensity
 - Modelica.Blocks.WrapAngle
 - Modelica.Blocks.Xor
 - Modelica.Blocks.Xor
 - Modelica.Blocks.ZeroCrossing
 - Modelica.Blocks.ZeroOrderHold
+- Modelica.BooleanNetwork1
+- Modelica.BusUsage
+- Modelica.BusUsage_Utilities
+- Modelica.Controller
+- Modelica.Densities
+- Modelica.DrydenContinuousTurbulence
+- Modelica.Examples
+- Modelica.Filter
+- Modelica.FilterWithDifferentiation
+- Modelica.FilterWithRiseTime
+- Modelica.ImpureRandom
+- Modelica.IntegerNetwork1
+- Modelica.Interaction1
+- Modelica.InverseModel
+- Modelica.LogicalNetwork1
+- Modelica.Modulation
+- Modelica.MotorWithCurrentControl
+- Modelica.Noise
+- Modelica.NormalDensity
+- Modelica.NormalNoiseProperties
+- Modelica.Part
+- Modelica.Parts
+- Modelica.PID_Controller
+- Modelica.RealNetwork1
+- Modelica.Rectifier12pulseFFT
+- Modelica.Rectifier6pulseFFT
+- Modelica.SinCosEncoder
+- Modelica.SlewRateLimiter
+- Modelica.TotalHarmonicDistortion
+- Modelica.UniformDensity
+- Modelica.UniformNoiseProperties
+- Modelica.Utilities
+- Modelica.WeibullDensity
 
 ### Clocked.BooleanSignals.NonPeriodic (4 个)
 
@@ -1706,7 +1706,9 @@
 
 ### Fluid (128 个)
 
-- Modelica.Fluid.BalanceEquations
+- Modelica.BalanceEquations
+- Modelica.ComponentDefinition
+- Modelica.Fluid
 - Modelica.Fluid.BaseClasses
 - Modelica.Fluid.BaseClasses
 - Modelica.Fluid.BaseClasses
@@ -1721,7 +1723,6 @@
 - Modelica.Fluid.Boundary_ph
 - Modelica.Fluid.Boundary_pT
 - Modelica.Fluid.ClosedVolume
-- Modelica.Fluid.ComponentDefinition
 - Modelica.Fluid.ConstantFlowHeatTransfer
 - Modelica.Fluid.ConstantHeatTransfer
 - Modelica.Fluid.ControlledPump
@@ -1736,8 +1737,6 @@
 - Modelica.Fluid.Fittings
 - Modelica.Fluid.FixedBoundary
 - Modelica.Fluid.FlowModels
-- Modelica.Fluid.Fluid
-- Modelica.Fluid.FluidConnectors
 - Modelica.Fluid.General
 - Modelica.Fluid.General
 - Modelica.Fluid.GenericResistances
@@ -1790,10 +1789,8 @@
 - Modelica.Fluid.Pump
 - Modelica.Fluid.QuadraticTurbulent
 - Modelica.Fluid.Records
-- Modelica.Fluid.RegularizingCharacteristics
 - Modelica.Fluid.RelativePressure
 - Modelica.Fluid.RelativeTemperature
-- Modelica.Fluid.ReleaseNotes
 - Modelica.Fluid.Sensors
 - Modelica.Fluid.SharedDocumentation
 - Modelica.Fluid.SimpleGenericOrifice
@@ -1816,12 +1813,9 @@
 - Modelica.Fluid.TurbulentPipeFlow
 - Modelica.Fluid.TwoPhaseFlow
 - Modelica.Fluid.Types
-- Modelica.Fluid.UpstreamDiscretization
-- Modelica.Fluid.UsersGuide
 - Modelica.Fluid.UsersGuide
 - Modelica.Fluid.Utilities
 - Modelica.Fluid.Utilities
-- Modelica.Fluid.ValveCharacteristics
 - Modelica.Fluid.ValveCompressible
 - Modelica.Fluid.ValveDiscrete
 - Modelica.Fluid.ValveDiscreteRamp
@@ -1833,7 +1827,13 @@
 - Modelica.Fluid.VolumeFlowRate
 - Modelica.Fluid.VolumeFlowRate
 - Modelica.Fluid.WallFriction
-- Modelica.Fluid.WallFriction
+- Modelica.FluidConnectors
+- Modelica.RegularizingCharacteristics
+- Modelica.ReleaseNotes
+- Modelica.UpstreamDiscretization
+- Modelica.UsersGuide
+- Modelica.ValveCharacteristics
+- Modelica.WallFriction
 
 ### Fluid.Examples (44 个)
 
@@ -1972,9 +1972,9 @@
 
 ### Magnetic.FluxTubes.Shapes.Force (6 个)
 
+- Modelica.Magnetic.FluxTubes.Shapes.Force
 - Modelica.Magnetic.FluxTubes.Shapes.Force.CuboidOrthogonalFlux
 - Modelica.Magnetic.FluxTubes.Shapes.Force.CuboidParallelFlux
-- Modelica.Magnetic.FluxTubes.Shapes.Force.Force
 - Modelica.Magnetic.FluxTubes.Shapes.Force.HollowCylinderAxialFlux
 - Modelica.Magnetic.FluxTubes.Shapes.Force.HollowCylinderRadialFlux
 - Modelica.Magnetic.FluxTubes.Shapes.Force.LeakageAroundPoles
@@ -2298,30 +2298,30 @@
 
 ### Math (19 个)
 
-- Modelica.Math.Examples
+- Modelica.Examples
+- Modelica.LAPACK
+- Modelica.Math
 - Modelica.Math.Examples
 - Modelica.Math.Examples
 - Modelica.Math.FastFourierTransform
 - Modelica.Math.Generators
-- Modelica.Math.LAPACK
-- Modelica.Math.Math
-- Modelica.Math.Matrices
 - Modelica.Math.Nonlinear
 - Modelica.Math.QuadratureLobatto3
 - Modelica.Math.Random
 - Modelica.Math.RealFFT1
 - Modelica.Math.RealFFT2
 - Modelica.Math.Utilities
-- Modelica.Math.Utilities
 - Modelica.Math.UtilityFunctions
 - Modelica.Math.Xorshift1024star
 - Modelica.Math.Xorshift128plus
 - Modelica.Math.Xorshift64star
+- Modelica.Matrices
+- Modelica.Utilities
 
 ### Mechanics.MultiBody (2 个)
 
-- Modelica.Mechanics.MultiBody.MultiBody
-- Modelica.Mechanics.MultiBody.World
+- Modelica.Mechanics.MultiBody
+- Modelica.Mechanics.World
 
 ### Mechanics.MultiBody.Examples.Constraints (4 个)
 
@@ -2355,6 +2355,7 @@
 
 ### Mechanics.MultiBody.Examples.Loops (11 个)
 
+- Modelica.Mechanics.MultiBody.Examples.Loops
 - Modelica.Mechanics.MultiBody.Examples.Loops.Engine1a
 - Modelica.Mechanics.MultiBody.Examples.Loops.Engine1b
 - Modelica.Mechanics.MultiBody.Examples.Loops.Engine1b_analytic
@@ -2363,7 +2364,6 @@
 - Modelica.Mechanics.MultiBody.Examples.Loops.Fourbar_analytic
 - Modelica.Mechanics.MultiBody.Examples.Loops.Fourbar1
 - Modelica.Mechanics.MultiBody.Examples.Loops.Fourbar2
-- Modelica.Mechanics.MultiBody.Examples.Loops.Loops
 - Modelica.Mechanics.MultiBody.Examples.Loops.PlanarFourbar
 - Modelica.Mechanics.MultiBody.Examples.Loops.PlanarLoops_analytic
 
@@ -2546,9 +2546,9 @@
 
 ### Mechanics.MultiBody.UsersGuide.Tutorial.LoopStructures (3 个)
 
+- Modelica.Mechanics.MultiBody.UsersGuide.Tutorial.LoopStructures
 - Modelica.Mechanics.MultiBody.UsersGuide.Tutorial.LoopStructures.AnalyticLoopHandling
 - Modelica.Mechanics.MultiBody.UsersGuide.Tutorial.LoopStructures.Introduction
-- Modelica.Mechanics.MultiBody.UsersGuide.Tutorial.LoopStructures.LoopStructures
 
 ### Mechanics.MultiBody.Visualizers (9 个)
 
@@ -2774,71 +2774,71 @@
 
 ### Media (65 个)
 
-- Modelica.Media.BalanceVolume
-- Modelica.Media.BasicStructure
-- Modelica.Media.BasicUsage
-- Modelica.Media.BridgmansTables
-- Modelica.Media.BridgmansTablesForWater
+- Modelica.BalanceVolume
+- Modelica.BasicStructure
+- Modelica.BasicUsage
+- Modelica.BridgmansTables
+- Modelica.BridgmansTablesForWater
+- Modelica.Common
+- Modelica.Constants
+- Modelica.Examples
+- Modelica.ExtendedProperties
+- Modelica.FixedAmbient
+- Modelica.FixedMassFlowRate
+- Modelica.FluidConstants
+- Modelica.FluidConstants
+- Modelica.IdealGas
+- Modelica.IdealGasH2O
+- Modelica.Initialization
+- Modelica.Interfaces
+- Modelica.Inverse_sh_T
+- Modelica.Inverse_sh_T
+- Modelica.Inverse_sh_TX
+- Modelica.Inverse_sh_TX
+- Modelica.Inverse_sine
+- Modelica.InverseIncompressible_sh_T
+- Modelica.Media
 - Modelica.Media.Common
-- Modelica.Media.Common
-- Modelica.Media.Constants
 - Modelica.Media.EOSIdealCoeff
 - Modelica.Media.EOSResidualCoeff
 - Modelica.Media.Examples
-- Modelica.Media.Examples
-- Modelica.Media.ExtendedProperties
-- Modelica.Media.FixedAmbient
-- Modelica.Media.FixedMassFlowRate
-- Modelica.Media.FluidConstants
-- Modelica.Media.FluidConstants
-- Modelica.Media.IdealGas
-- Modelica.Media.IdealGasH2O
 - Modelica.Media.Incompressible
-- Modelica.Media.Initialization
-- Modelica.Media.Interfaces
-- Modelica.Media.Inverse_sh_T
-- Modelica.Media.Inverse_sh_T
-- Modelica.Media.Inverse_sh_TX
-- Modelica.Media.Inverse_sh_TX
-- Modelica.Media.Inverse_sine
-- Modelica.Media.InverseIncompressible_sh_T
-- Modelica.Media.Media
-- Modelica.Media.MediumDefinition
-- Modelica.Media.MediumUsage
-- Modelica.Media.MixtureGases
-- Modelica.Media.MoistAir
-- Modelica.Media.MoistAir
-- Modelica.Media.OptionalProperties
-- Modelica.Media.PartialLinearFluid
-- Modelica.Media.PartialMedium
-- Modelica.Media.PartialMedium
-- Modelica.Media.PartialSimpleIdealGasMedium
-- Modelica.Media.PartialSimpleMedium
-- Modelica.Media.PartialTestModel
-- Modelica.Media.PartialTestModel2
-- Modelica.Media.PortVolume
-- Modelica.Media.PsychrometricData
 - Modelica.Media.R134a
 - Modelica.Media.R134a_ph
-- Modelica.Media.ReferenceAir
-- Modelica.Media.ShortPipe
-- Modelica.Media.ShortPipe
-- Modelica.Media.SimpleLiquidWater
-- Modelica.Media.SolveOneNonlinearEquation
-- Modelica.Media.SpecificEnthalpyAsFunction
-- Modelica.Media.StaticStateSelection
 - Modelica.Media.T_props_ph
 - Modelica.Media.TableBased
-- Modelica.Media.TemplateMedium
 - Modelica.Media.TestGlycol
-- Modelica.Media.TestTwoPhaseStates
-- Modelica.Media.TwoPhase
-- Modelica.Media.TwoPhase
-- Modelica.Media.TwoPhaseWater
-- Modelica.Media.Types
-- Modelica.Media.UsersGuide
-- Modelica.Media.Utilities
-- Modelica.Media.WaterIF97
+- Modelica.MediumDefinition
+- Modelica.MediumUsage
+- Modelica.MixtureGases
+- Modelica.MoistAir
+- Modelica.MoistAir
+- Modelica.OptionalProperties
+- Modelica.PartialLinearFluid
+- Modelica.PartialMedium
+- Modelica.PartialMedium
+- Modelica.PartialSimpleIdealGasMedium
+- Modelica.PartialSimpleMedium
+- Modelica.PartialTestModel
+- Modelica.PartialTestModel2
+- Modelica.PortVolume
+- Modelica.PsychrometricData
+- Modelica.ReferenceAir
+- Modelica.ShortPipe
+- Modelica.ShortPipe
+- Modelica.SimpleLiquidWater
+- Modelica.SolveOneNonlinearEquation
+- Modelica.SpecificEnthalpyAsFunction
+- Modelica.StaticStateSelection
+- Modelica.TemplateMedium
+- Modelica.TestTwoPhaseStates
+- Modelica.TwoPhase
+- Modelica.TwoPhase
+- Modelica.TwoPhaseWater
+- Modelica.Types
+- Modelica.UsersGuide
+- Modelica.Utilities
+- Modelica.WaterIF97
 
 ### Media.Air (11 个)
 
@@ -2856,18 +2856,18 @@
 
 ### Media.IdealGases.Common (4 个)
 
-- Modelica.Media.IdealGases.Common.Common
+- Modelica.Media.IdealGases.Common
 - Modelica.Media.IdealGases.Common.Functions
-- Modelica.Media.IdealGases.Common.MixtureGasNasa
-- Modelica.Media.IdealGases.Common.SingleGasNasa
+- Modelica.Media.IdealGases.MixtureGasNasa
+- Modelica.Media.IdealGases.SingleGasNasa
 
 ### Media.Water (5 个)
 
+- Modelica.Media.Water
 - Modelica.Media.Water.BaseIF97
 - Modelica.Media.Water.IF97_Utilities
 - Modelica.Media.Water.Transport
-- Modelica.Media.Water.Water
-- Modelica.Media.Water.WaterIF97_base
+- Modelica.Media.WaterIF97_base
 
 ### Resources.Images.Media.UsersGuide (1 个)
 

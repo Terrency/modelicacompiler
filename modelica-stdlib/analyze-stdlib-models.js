@@ -24,8 +24,8 @@ console.log('╚═════════════════════�
  * 模型信息
  */
 class ModelInfo {
-  constructor(name, type, filePath, hasEquation = false, hasAlgorithm = false) {
-    this.name = name;
+  constructor(fullName, type, filePath, hasEquation = false, hasAlgorithm = false) {
+    this.name = fullName; // 完整名称，如 Modelica.Blocks.Math.Gain
     this.type = type;
     this.filePath = filePath;
     this.hasEquation = hasEquation;
@@ -68,6 +68,13 @@ function extractModels(filePath) {
     .replace(/\/\/.*$/gm, '')
     .replace(/\/\*[\s\S]*?\*\//g, '');
 
+  // 提取 within 语句来确定包路径
+  let withinPackage = '';
+  const withinMatch = cleanContent.match(/within\s+([A-Za-z0-9_.]+)\s*;/);
+  if (withinMatch) {
+    withinPackage = withinMatch[1];
+  }
+
   // 查找所有顶层定义
   const pattern = /(?:^|[;\n])\s*(?:(public|protected)\s+)?(?:(partial|encapsulated|expandable)\s+)?(package|class|model|function|record|block|connector|type|operator|operator\s+function|operator\s+record)\s+([A-Z][a-zA-Z0-9_]*)/gm;
 
@@ -91,7 +98,33 @@ function extractModels(filePath) {
       // 检查是否有 algorithm 段
       const hasAlgorithm = /\balgorithm\b/.test(definition);
 
-      models.push(new ModelInfo(name, type, filePath, hasEquation, hasAlgorithm));
+      // 构建完整名称
+      // 如果有 within 语句，完整名称是 within.package.name
+      // 否则，使用文件路径来推断包名
+      let fullName;
+      if (withinPackage) {
+        // within语句已经包含完整包路径，如 "Modelica.Blocks"
+        fullName = `${withinPackage}.${name}`;
+      } else {
+        // 使用文件路径推断包名
+        const relativePath = path.relative(STDLIB_ROOT, filePath);
+        const packagePath = relativePath.split(path.sep).slice(0, -1).join('.');
+        fullName = packagePath ? `Modelica.${packagePath}.${name}` : `Modelica.${name}`;
+      }
+
+      // 创建模型信息，fullName 已经是完整名称（包含 Modelica. 前缀）
+      const modelInfo = {
+        name: fullName,
+        shortName: name,
+        type: type,
+        filePath: filePath,
+        hasEquation: hasEquation,
+        hasAlgorithm: hasAlgorithm,
+        isExecutable: hasEquation,
+        withinPackage: withinPackage
+      };
+
+      models.push(modelInfo);
     }
   }
 
@@ -206,10 +239,7 @@ function generateManifests(allModels, stats) {
       .sort((a, b) => a.name.localeCompare(b.name))
       .slice(0, 100) // 限制每个类型最多显示100个
       .forEach(model => {
-        const relativePath = path.relative(STDLIB_ROOT, model.filePath);
-        const packagePath = relativePath.split(path.sep).slice(0, -1).join('.');
-        const fullName = packagePath ? `Modelica.${packagePath}.${model.name}` : `Modelica.${model.name}`;
-        allModelsContent += `- ${fullName}\n`;
+        allModelsContent += `- ${model.name}\n`;
       });
 
     if (byType[type].length > 100) {
@@ -259,8 +289,7 @@ function generateManifests(allModels, stats) {
     models
       .sort((a, b) => a.name.localeCompare(b.name))
       .forEach(model => {
-        const fullName = packageName === 'Root' ? `Modelica.${model.name}` : `Modelica.${packageName}.${model.name}`;
-        executableContent += `- ${fullName}\n`;
+        executableContent += `- ${model.name}\n`;
       });
 
     executableContent += `\n`;
@@ -279,11 +308,8 @@ function generateManifests(allModels, stats) {
       byType: stats.byType
     },
     models: allModels.map(m => {
-      const relativePath = path.relative(STDLIB_ROOT, m.filePath);
-      const packagePath = relativePath.split(path.sep).slice(0, -1).join('.');
-      const fullName = packagePath ? `Modelica.${packagePath}.${m.name}` : `Modelica.${m.name}`;
       return {
-        name: fullName,
+        name: m.name, // 已经是完整名称
         type: m.type,
         file: path.relative(STDLIB_ROOT, m.filePath),
         hasEquation: m.hasEquation,
@@ -292,11 +318,8 @@ function generateManifests(allModels, stats) {
       };
     }),
     executableModels: executableModels.map(m => {
-      const relativePath = path.relative(STDLIB_ROOT, m.filePath);
-      const packagePath = relativePath.split(path.sep).slice(0, -1).join('.');
-      const fullName = packagePath ? `Modelica.${packagePath}.${m.name}` : `Modelica.${m.name}`;
       return {
-        name: fullName,
+        name: m.name, // 已经是完整名称
         file: path.relative(STDLIB_ROOT, m.filePath)
       };
     })

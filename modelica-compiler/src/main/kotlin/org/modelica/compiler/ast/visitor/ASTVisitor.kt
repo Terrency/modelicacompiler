@@ -18,6 +18,7 @@ interface ASTVisitor<T> {
     fun visitImportClause(node: ImportClause): T
     fun visitExtendsClause(node: ExtendsClause): T
     fun visitComponentDeclaration(node: ComponentDeclaration): T
+    fun visitNestedClassElement(node: NestedClassElement): T
 
     // 方程
     fun visitSimpleEquation(node: Equation.Simple): T

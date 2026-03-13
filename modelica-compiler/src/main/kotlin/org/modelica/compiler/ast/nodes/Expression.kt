@@ -64,10 +64,16 @@ sealed class Expression : ASTNode {
         override fun <T> accept(visitor: ASTVisitor<T>): T = visitor.visitUnaryExpression(this)
     }
 
+    // 函数调用参数
+    sealed class CallArgument {
+        data class Positional(val value: Expression) : CallArgument()
+        data class Named(val name: String, val value: Expression) : CallArgument()
+    }
+
     // 函数调用
     data class FunctionCall(
         val function: Expression,
-        val arguments: List<Expression>,
+        val arguments: List<CallArgument>,
         override val location: SourceLocation? = null
     ) : Expression() {
         override fun <T> accept(visitor: ASTVisitor<T>): T = visitor.visitFunctionCall(this)

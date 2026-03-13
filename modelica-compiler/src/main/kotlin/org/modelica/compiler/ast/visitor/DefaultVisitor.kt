@@ -174,7 +174,12 @@ open class DefaultVisitor<T>(protected val defaultValue: T) : ASTVisitor<T> {
 
     override fun visitFunctionCall(node: Expression.FunctionCall): T {
         node.function.accept(this)
-        node.arguments.forEach { it.accept(this) }
+        node.arguments.forEach { arg ->
+            when (arg) {
+                is Expression.CallArgument.Positional -> arg.value.accept(this)
+                is Expression.CallArgument.Named -> arg.value.accept(this)
+            }
+        }
         return defaultValue
     }
 

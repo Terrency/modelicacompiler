@@ -93,17 +93,12 @@ class ModelicaParser(
         // 解析类名
         val name = consume(TokenType.IDENTIFIER, "Expected class name")
 
-        // 解析类特化（可选）
-        val specialization = if (match(TokenType.EQUALS)) {
-            parseClassSpecialization()
-        } else null
-
         // 解析类描述（可选）
         val description = parseDescription()
 
         // 解析组合子句
         val composition = if (match(TokenType.EQUALS)) {
-            // 短类定义
+            // 短类定义（如 type Angle = Real;）
             val baseClass = parseExpression()
             consume(TokenType.SEMICOLON, "Expected ';' after short class definition")
             ClassComposition(short = baseClass)
@@ -112,25 +107,28 @@ class ModelicaParser(
             parseComposition()
         }
 
-        // 解析结束关键字
-        val endKeyword = consume(TokenType.END, "Expected 'end'")
+        // 短类定义没有 end 关键字
+        if (composition.short == null) {
+            // 解析结束关键字
+            consume(TokenType.END, "Expected 'end'")
 
-        // 解析结束类名
-        val endName = consume(TokenType.IDENTIFIER, "Expected class name after 'end'")
-        if (endName.lexeme != name.lexeme) {
-            errors.add(ParseError(
-                "End name '$endName' does not match class name '$name'",
-                endName.location
-            ))
+            // 解析结束类名
+            val endName = consume(TokenType.IDENTIFIER, "Expected class name after 'end'")
+            if (endName.lexeme != name.lexeme) {
+                errors.add(ParseError(
+                    "End name '$endName' does not match class name '$name'",
+                    endName.location
+                ))
+            }
+
+            consume(TokenType.SEMICOLON, "Expected ';' after end name")
         }
-
-        consume(TokenType.SEMICOLON, "Expected ';' after end name")
 
         return ClassDefinition(
             prefixes = prefixes,
             classType = classType,
             name = name.lexeme,
-            specialization = specialization,
+            specialization = null,
             description = description,
             composition = composition,
             location = name.location
@@ -822,11 +820,11 @@ class ModelicaParser(
                     expr = Expression.ArrayAccess(expr, indices)
                 }
                 match(TokenType.LPAREN) -> {
-                    val args = mutableListOf<Expression>()
+                    val args = mutableListOf<Expression.CallArgument>()
                     if (!check(TokenType.RPAREN)) {
-                        args.add(parseExpression())
+                        args.add(parseCallArgument())
                         while (match(TokenType.COMMA)) {
-                            args.add(parseExpression())
+                            args.add(parseCallArgument())
                         }
                     }
                     consume(TokenType.RPAREN, "Expected ')'")
@@ -852,6 +850,11 @@ class ModelicaParser(
                 consume(TokenType.RPAREN, "Expected ')' after der argument")
                 Expression.Der(arg)
             }
+            // 支持内置类型关键字作为标识符（用于type定义）
+            match(TokenType.REAL) -> Expression.Identifier(previous.lexeme)
+            match(TokenType.INTEGER) -> Expression.Identifier(previous.lexeme)
+            match(TokenType.BOOLEAN) -> Expression.Identifier(previous.lexeme)
+            match(TokenType.STRING) -> Expression.Identifier(previous.lexeme)
             match(TokenType.IDENTIFIER) -> Expression.Identifier(previous.lexeme)
             match(TokenType.LPAREN) -> {
                 val expr = parseExpression()
@@ -871,6 +874,22 @@ class ModelicaParser(
             }
             else -> throw ParseError("Expected expression", peek.location)
         }
+    }
+
+    /**
+     * 解析函数调用参数（支持位置参数和命名参数）
+     */
+    private fun parseCallArgument(): Expression.CallArgument {
+        // 检查是否为命名参数：identifier = expression
+        if (check(TokenType.IDENTIFIER) && checkNext(TokenType.EQUALS)) {
+            val name = consume(TokenType.IDENTIFIER, "Expected parameter name").lexeme
+            consume(TokenType.EQUALS, "Expected '=' after parameter name")
+            val value = parseExpression()
+            return Expression.CallArgument.Named(name, value)
+        }
+
+        // 否则为位置参数
+        return Expression.CallArgument.Positional(parseExpression())
     }
 
     // ==================== 辅助方法 ====================

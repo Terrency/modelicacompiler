@@ -245,7 +245,12 @@ class IRBuilder {
             is org.modelica.compiler.ast.nodes.Expression.FunctionCall ->
                 IRExpression.FunctionCall(
                     function = (expr.function as? org.modelica.compiler.ast.nodes.Expression.Identifier)?.name ?: "unknown",
-                    arguments = expr.arguments.map { buildExpression(it) }
+                    arguments = expr.arguments.map { arg ->
+                        when (arg) {
+                            is org.modelica.compiler.ast.nodes.Expression.CallArgument.Positional -> buildExpression(arg.value)
+                            is org.modelica.compiler.ast.nodes.Expression.CallArgument.Named -> buildExpression(arg.value)
+                        }
+                    }
                 )
             is org.modelica.compiler.ast.nodes.Expression.ArrayAccess ->
                 IRExpression.ArrayAccess(

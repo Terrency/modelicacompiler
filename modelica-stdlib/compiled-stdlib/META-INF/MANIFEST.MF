@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Created-By: Modelica Standard Library Compiler v4.0
+Implementation-Title: Modelica Standard Library
+Implementation-Version: 3.2.3

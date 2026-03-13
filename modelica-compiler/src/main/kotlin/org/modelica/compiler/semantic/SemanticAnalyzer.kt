@@ -358,7 +358,12 @@ class SemanticAnalyzer : DefaultVisitor<Unit>(Unit) {
             }
             is Expression.FunctionCall -> {
                 val funcType = analyzeExpression(expr.function)
-                val argTypes = expr.arguments.map { analyzeExpression(it) }
+                val argTypes = expr.arguments.map { arg ->
+                    when (arg) {
+                        is Expression.CallArgument.Positional -> analyzeExpression(arg.value)
+                        is Expression.CallArgument.Named -> analyzeExpression(arg.value)
+                    }
+                }
                 typeChecker.checkFunctionCall(funcType, argTypes, expr.location)
             }
             is Expression.ArrayAccess -> {

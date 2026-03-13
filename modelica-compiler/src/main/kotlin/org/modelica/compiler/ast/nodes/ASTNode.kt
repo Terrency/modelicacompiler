@@ -123,7 +123,8 @@ data class TypePrefixes(
     val parameter: Boolean = false,
     val constant: Boolean = false,
     val input: Boolean = false,
-    val output: Boolean = false
+    val output: Boolean = false,
+    val final: Boolean = false
 )
 
 /**
@@ -161,7 +162,8 @@ data class ComponentItem(
     val name: String,
     val dimensions: List<ArrayDimension> = emptyList(),
     val modification: Modification? = null,
-    val description: String? = null
+    val description: String? = null,
+    val condition: Expression? = null  // 条件表达式（if use_reset）
 )
 
 /**

@@ -262,6 +262,7 @@ class ModelicaParser(
     private fun checkTypePrefix(): Boolean {
         return check(TokenType.FLOW, TokenType.STREAM, TokenType.DISCRETE,
             TokenType.PARAMETER, TokenType.CONSTANT, TokenType.INPUT, TokenType.OUTPUT,
+            TokenType.FINAL,
             TokenType.REAL, TokenType.INTEGER, TokenType.BOOLEAN, TokenType.STRING)
     }
 
@@ -321,6 +322,7 @@ class ModelicaParser(
         var constant = false
         var input = false
         var output = false
+        var final = false
 
         while (true) {
             when {
@@ -331,11 +333,12 @@ class ModelicaParser(
                 match(TokenType.CONSTANT) -> constant = true
                 match(TokenType.INPUT) -> input = true
                 match(TokenType.OUTPUT) -> output = true
+                match(TokenType.FINAL) -> final = true
                 else -> break
             }
         }
 
-        return TypePrefixes(flow, stream, discrete, parameter, constant, input, output)
+        return TypePrefixes(flow, stream, discrete, parameter, constant, input, output, final)
     }
 
     private fun parseType(): TypeSpec {
@@ -397,6 +400,11 @@ class ModelicaParser(
             }
         }
 
+        // 解析条件表达式（if use_reset）
+        val condition = if (match(TokenType.IF)) {
+            parseExpression()
+        } else null
+
         // 解析默认值
         val modification = if (match(TokenType.EQUALS)) {
             // 值修改
@@ -407,7 +415,7 @@ class ModelicaParser(
         // 解析描述
         val description = parseDescription()
 
-        return ComponentItem(name, dimensions, modification, description)
+        return ComponentItem(name, dimensions, modification, description, condition)
     }
 
     private fun parseModification(): Modification {

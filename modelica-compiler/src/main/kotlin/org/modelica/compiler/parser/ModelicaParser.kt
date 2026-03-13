@@ -386,10 +386,19 @@ class ModelicaParser(
             dimensions.add(dim)
         }
 
-        // 解析修饰
-        val modification = if (match(TokenType.LPAREN)) {
-            parseModification()
-        } else if (match(TokenType.EQUALS)) {
+        // 解析变量修饰符（如 x(unit="m")）
+        // 跳过变量名后面的括号内容
+        if (match(TokenType.LPAREN)) {
+            var depth = 1
+            while (depth > 0 && !isAtEnd) {
+                if (match(TokenType.LPAREN)) depth++
+                else if (match(TokenType.RPAREN)) depth--
+                else advance()
+            }
+        }
+
+        // 解析默认值
+        val modification = if (match(TokenType.EQUALS)) {
             // 值修改
             val value = parseExpression()
             Modification.Value(value)

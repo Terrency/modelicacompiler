@@ -208,7 +208,7 @@ function generateManifests(allModels, stats) {
       .forEach(model => {
         const relativePath = path.relative(STDLIB_ROOT, model.filePath);
         const packagePath = relativePath.split(path.sep).slice(0, -1).join('.');
-        const fullName = packagePath ? `${packagePath}.${model.name}` : model.name;
+        const fullName = packagePath ? `Modelica.${packagePath}.${model.name}` : `Modelica.${model.name}`;
         allModelsContent += `- ${fullName}\n`;
       });
 
@@ -259,7 +259,7 @@ function generateManifests(allModels, stats) {
     models
       .sort((a, b) => a.name.localeCompare(b.name))
       .forEach(model => {
-        const fullName = packageName === 'Root' ? model.name : `${packageName}.${model.name}`;
+        const fullName = packageName === 'Root' ? `Modelica.${model.name}` : `Modelica.${packageName}.${model.name}`;
         executableContent += `- ${fullName}\n`;
       });
 
@@ -278,18 +278,28 @@ function generateManifests(allModels, stats) {
       executable: stats.executable,
       byType: stats.byType
     },
-    models: allModels.map(m => ({
-      name: m.name,
-      type: m.type,
-      file: path.relative(STDLIB_ROOT, m.filePath),
-      hasEquation: m.hasEquation,
-      hasAlgorithm: m.hasAlgorithm,
-      isExecutable: m.isExecutable
-    })),
-    executableModels: executableModels.map(m => ({
-      name: m.name,
-      file: path.relative(STDLIB_ROOT, m.filePath)
-    }))
+    models: allModels.map(m => {
+      const relativePath = path.relative(STDLIB_ROOT, m.filePath);
+      const packagePath = relativePath.split(path.sep).slice(0, -1).join('.');
+      const fullName = packagePath ? `Modelica.${packagePath}.${m.name}` : `Modelica.${m.name}`;
+      return {
+        name: fullName,
+        type: m.type,
+        file: path.relative(STDLIB_ROOT, m.filePath),
+        hasEquation: m.hasEquation,
+        hasAlgorithm: m.hasAlgorithm,
+        isExecutable: m.isExecutable
+      };
+    }),
+    executableModels: executableModels.map(m => {
+      const relativePath = path.relative(STDLIB_ROOT, m.filePath);
+      const packagePath = relativePath.split(path.sep).slice(0, -1).join('.');
+      const fullName = packagePath ? `Modelica.${packagePath}.${m.name}` : `Modelica.${m.name}`;
+      return {
+        name: fullName,
+        file: path.relative(STDLIB_ROOT, m.filePath)
+      };
+    })
   };
 
   fs.writeFileSync(jsonFile, JSON.stringify(manifest, null, 2), 'utf-8');
